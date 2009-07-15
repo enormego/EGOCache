@@ -40,13 +40,20 @@ static id __instance;
 		
 		for(NSString* key in cacheDictionary) {
 			NSDate* date = [cacheDictionary objectForKey:key];
-			if([date isPastDate]) {
+			if([[[NSDate date] earlierDate:date] isEqualToDate:date]) {
 				[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
 			}
 		}
 	}
 	
 	return self;
+}
+
+- (BOOL)hasCacheForKey:(NSString*)key {
+	NSDate* date = [cacheDictionary objectForKey:key];
+	if(!date) return NO;
+	if([[[NSDate date] earlierDate:date] isEqualToDate:date]) return NO;
+	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(key)];
 }
 
 #pragma mark -
@@ -64,10 +71,7 @@ static id __instance;
 }
 
 - (NSData*)dataForKey:(NSString*)key {
-	NSDate* date = [cacheDictionary objectForKey:key];
-	if([date isPastDate]) {
-		return nil;
-	} else if([[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(key)]) {
+	if([self hasCacheForKey:key]) {
 		return [NSData dataWithContentsOfFile:cachePathForKey(key) options:0 error:NULL];
 	} else {
 		return nil;
@@ -88,6 +92,22 @@ static id __instance;
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:timeoutInterval];
 }
+
+#pragma mark -
+#pragma mark Image methds
+
+- (UIImage*)imageForKey:(NSString*)key {
+	return [UIImage imageWithData:[self dataForKey:key]];
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
+	[self setImage:anImage forKey:key withTimeoutInterval:60 * 60 * 24];
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	[self setData:UIImagePNGRepresentation(anImage) forKey:key withTimeoutInterval:timeoutInterval];
+}
+
 
 #pragma mark -
 
