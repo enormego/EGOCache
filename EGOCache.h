@@ -26,8 +26,14 @@
 - (void)setString:(NSString*)aString forKey:(NSString*)key; // withTimeoutInterval: 1 day
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 
+#if TARGET_OS_IPHONE
 - (UIImage*)imageForKey:(NSString*)key;
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key; // withTimeoutInterval: 1 day
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+#else
+- (NSImage*)imageForKey:(NSString*)key;
+- (void)setImage:(NSImage*)anImage forKey:(NSString*)key; // withTimeoutInterval: 1 day
+- (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+#endif
 
 @end

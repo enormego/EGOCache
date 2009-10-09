@@ -96,6 +96,8 @@ static id __instance;
 #pragma mark -
 #pragma mark Image methds
 
+#if TARGET_OS_IPHONE
+
 - (UIImage*)imageForKey:(NSString*)key {
 	return [UIImage imageWithData:[self dataForKey:key]];
 }
@@ -108,6 +110,23 @@ static id __instance;
 	[self setData:UIImagePNGRepresentation(anImage) forKey:key withTimeoutInterval:timeoutInterval];
 }
 
+
+#else
+
+- (NSImage*)imageForKey:(NSString*)key {
+	return [[[NSImage alloc] initWithData:[self dataForKey:key]] autorelease];
+}
+
+- (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
+	[self setImage:anImage forKey:key withTimeoutInterval:60 * 60 * 24];
+}
+
+- (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	[self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
+		   forKey:key withTimeoutInterval:timeoutInterval];
+}
+
+#endif
 
 #pragma mark -
 
