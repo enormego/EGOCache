@@ -8,13 +8,11 @@
 
 #import "EGOCache.h"
 
-#define cachePathForKey(key) [NSHomeDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"Documents/EGOCache/%@", key]]
-
 static NSString* _EGOCacheDirectory;
 
 static inline NSString* EGOCacheDirectory() {
 	@synchronized(self) {
-	if(!EGOCacheDirectory) {
+		if(!EGOCacheDirectory) {
 		#ifdef TARGET_OS_IPHONE
 			_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/EGOCache"] retain];
 		#else
