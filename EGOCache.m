@@ -5,6 +5,10 @@
 //  Created by Shaun Harrison on 7/4/09.
 //  Copyright 2009 enormego. All rights reserved.
 //
+//  This work is licensed under the Creative Commons GNU General Public License License.
+//  To view a copy of this license, visit http://creativecommons.org/licenses/GPL/2.0/
+//  or send a letter to Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
+//
 
 #import "EGOCache.h"
 
@@ -65,6 +69,16 @@ static id __instance;
 	}
 	
 	return self;
+}
+
+- (void)clearCache {
+	for(NSString* key in cacheDictionary) {
+		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
+	}
+
+	[cacheDictionary removeAllObjects];
+	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
