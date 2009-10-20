@@ -11,21 +11,19 @@
 static NSString* _EGOCacheDirectory;
 
 static inline NSString* EGOCacheDirectory() {
-	@synchronized(self) {
-		if(!EGOCacheDirectory) {
-		#ifdef TARGET_OS_IPHONE
-			_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/EGOCache"] retain];
-		#else
-			NSString* appSupportDir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-			_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] retain];
-		#endif
-		}
+	if(!_EGOCacheDirectory) {
+#ifdef TARGET_OS_IPHONE
+		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/EGOCache"] retain];
+#else
+		NSString* appSupportDir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+		_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] retain];
+#endif
 	}
 	
 	return _EGOCacheDirectory;
 }
 
-static inline NSString* cachePathForKey(key) {
+static inline NSString* cachePathForKey(NSString* key) {
 	return [EGOCacheDirectory() stringByAppendingPathComponent:key];
 }
 
@@ -87,7 +85,10 @@ static id __instance;
 	[data writeToFile:cachePathForKey(key) atomically:YES];
 	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
 	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
+	
+	// Prevents multiple-rapid user defaults saves from happening, which will slow down your app
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(saveCacheDictionary) object:nil];
+	[self performSelector:@selector(saveCacheDictionary) withObject:nil afterDelay:1.0];
 }
 
 - (NSData*)dataForKey:(NSString*)key {
@@ -96,6 +97,10 @@ static id __instance;
 	} else {
 		return nil;
 	}
+}
+
+- (void)saveCacheDictionary {
+	[[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark -
