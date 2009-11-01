@@ -17,7 +17,7 @@ static NSString* _EGOCacheDirectory;
 static inline NSString* EGOCacheDirectory() {
 	if(!_EGOCacheDirectory) {
 #ifdef TARGET_OS_IPHONE
-		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents/EGOCache"] retain];
+		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Caches/EGOCache"] retain];
 #else
 		NSString* appSupportDir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 		_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] retain];
