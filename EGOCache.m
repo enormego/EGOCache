@@ -75,7 +75,7 @@ static id __instance;
 	for(NSString* key in cacheDictionary) {
 		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
 	}
-
+	
 	[cacheDictionary removeAllObjects];
 	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
@@ -98,11 +98,13 @@ static id __instance;
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[data writeToFile:cachePathForKey(key) atomically:YES];
 	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
-	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
 	
-	// Prevents multiple-rapid user defaults saves from happening, which will slow down your app
+	[self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES]; // Need to make sure the save delay get scheduled in the main runloop, not the current threads
+}
+
+- (void)saveAfterDelay { // Prevents multiple-rapid user defaults saves from happening, which will slow down your app
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(saveCacheDictionary) object:nil];
-	[self performSelector:@selector(saveCacheDictionary) withObject:nil afterDelay:1.0];
+	[self performSelector:@selector(saveCacheDictionary) withObject:nil afterDelay:0.3];
 }
 
 - (NSData*)dataForKey:(NSString*)key {
@@ -114,7 +116,10 @@ static id __instance;
 }
 
 - (void)saveCacheDictionary {
-	[[NSUserDefaults standardUserDefaults] synchronize];
+	@synchronized(self) {
+		[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+	}
 }
 
 #pragma mark -
