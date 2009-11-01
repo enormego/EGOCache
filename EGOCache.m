@@ -55,6 +55,8 @@ static id __instance;
 			cacheDictionary = [[NSMutableDictionary alloc] init];
 		}
 		
+    diskOperationQueue = [[NSOperationQueue alloc] init];
+		
 		[[NSFileManager defaultManager] createDirectoryAtPath:EGOCacheDirectory() 
 								  withIntermediateDirectories:YES 
 												   attributes:nil 
@@ -96,7 +98,17 @@ static id __instance;
 }
 
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	[data writeToFile:cachePathForKey(key) atomically:YES];
+	NSString *cachePath = cachePathForKey(key);
+  NSInvocation *diskWriteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
+  [diskWriteInvocation setTarget:self];
+  [diskWriteInvocation setSelector:@selector(writeData:toPath:)];
+  [diskWriteInvocation setArgument:&data atIndex:2];
+  [diskWriteInvocation setArgument:&cachePath atIndex:3];
+
+  NSInvocationOperation *diskWriteOperation = [[NSInvocationOperation alloc] initWithInvocation:diskWriteInvocation];
+  [diskOperationQueue addOperation:diskWriteOperation];
+  [diskWriteOperation release];
+  
 	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
 	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
 	
@@ -112,6 +124,11 @@ static id __instance;
 		return nil;
 	}
 }
+
+- (void)writeData:(NSData*)data toPath:(NSString *)path;
+{
+  [data writeToFile:path atomically:YES];
+} 
 
 - (void)saveCacheDictionary {
 	[[NSUserDefaults standardUserDefaults] synchronize];
@@ -170,6 +187,7 @@ static id __instance;
 #pragma mark -
 
 - (void)dealloc {
+  [diskOperationQueue release];
 	[cacheDictionary release];
 	[super dealloc];
 }

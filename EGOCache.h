@@ -16,6 +16,7 @@
 @interface EGOCache : NSObject {
 @private
 	NSMutableDictionary* cacheDictionary;
+  NSOperationQueue* diskOperationQueue;
 }
 
 + (EGOCache*)currentCache;
