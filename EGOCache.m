@@ -33,6 +33,14 @@ static inline NSString* cachePathForKey(NSString* key) {
 
 static id __instance;
 
+@interface EGOCache ()
+- (void)removeItemFromCache:(NSString*)key;
+- (void)performDiskWriteOperation:(NSInvocation *)invoction;
+- (void)saveCacheDictionary;
+@end
+
+#pragma mark -
+
 @implementation EGOCache
 
 + (EGOCache*)currentCache {
@@ -86,8 +94,15 @@ static id __instance;
 }
 
 - (void)removeItemFromCache:(NSString*)key {
-  [[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
-  [cacheDictionary removeObectForKey:key]
+  NSString *cachePath = cachePathForKey(key);
+  
+  NSInvocation *deleteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(deleteDataAtPath:)]];
+  [deleteInvocation setTarget:self];
+  [deleteInvocation setSelector:@selector(deleteDataAtPath:)];
+  [deleteInvocation setArgument:&cachePath atIndex:2];
+
+  [self performDiskWriteOperation:deleteInvocation];
+  [cacheDictionary removeObjectForKey:key];
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
@@ -106,16 +121,13 @@ static id __instance;
 
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
   NSString *cachePath = cachePathForKey(key);
-  NSInvocation *diskWriteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
-  [diskWriteInvocation setTarget:self];
-  [diskWriteInvocation setSelector:@selector(writeData:toPath:)];
-  [diskWriteInvocation setArgument:&data atIndex:2];
-  [diskWriteInvocation setArgument:&cachePath atIndex:3];
+  NSInvocation *writeInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
+  [writeInvocation setTarget:self];
+  [writeInvocation setSelector:@selector(writeData:toPath:)];
+  [writeInvocation setArgument:&data atIndex:2];
+  [writeInvocation setArgument:&cachePath atIndex:3];
 
-  NSInvocationOperation *diskWriteOperation = [[NSInvocationOperation alloc] initWithInvocation:diskWriteInvocation];
-  [diskOperationQueue addOperation:diskWriteOperation];
-  [diskWriteOperation release];
-  
+  [self performDiskWriteOperation:writeInvocation];
   [cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
   
   [self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES]; // Need to make sure the save delay get scheduled in the main runloop, not the current threads
@@ -138,6 +150,11 @@ static id __instance;
 {
   [data writeToFile:path atomically:YES];
 } 
+
+- (void)deleteDataAtPath:(NSString *)path
+{
+  [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
+}
 
 - (void)saveCacheDictionary {
   @synchronized(self) {
@@ -195,6 +212,15 @@ static id __instance;
 }
 
 #endif
+
+#pragma mark -
+#pragma mark Disk writing operations
+
+- (void)performDiskWriteOperation:(NSInvocation *)invoction {
+  NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:invoction];
+  [diskOperationQueue addOperation:operation];
+  [operation release];
+}
 
 #pragma mark -
 
