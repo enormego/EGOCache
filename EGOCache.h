@@ -17,31 +17,33 @@
 @private
 	NSMutableDictionary* cacheDictionary;
 	NSOperationQueue* diskOperationQueue;
+	NSTimeInterval defaultTimeoutInterval;
 }
 
 + (EGOCache*)currentCache;
 
-- (void)clearCache; // This is blocking, and may take a while.
-- (void)clearCache:(NSString*)key;
+- (void)clearCache;
+- (void)removeCacheForKey:(NSString*)key;
 
 - (BOOL)hasCacheForKey:(NSString*)key;
 
 - (NSData*)dataForKey:(NSString*)key;
-- (void)setData:(NSData*)data forKey:(NSString*)key; // withTimeoutInterval: 1 day
+- (void)setData:(NSData*)data forKey:(NSString*)key; // withTimeoutInterval:defaultTimeoutInterval
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 
 - (NSString*)stringForKey:(NSString*)key;
-- (void)setString:(NSString*)aString forKey:(NSString*)key; // withTimeoutInterval: 1 day
+- (void)setString:(NSString*)aString forKey:(NSString*)key; // withTimeoutInterval:defaultTimeoutInterval
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 
 #if TARGET_OS_IPHONE
 - (UIImage*)imageForKey:(NSString*)key;
-- (void)setImage:(UIImage*)anImage forKey:(NSString*)key; // withTimeoutInterval: 1 day
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key; // withTimeoutInterval:defaultTimeoutInterval
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 #else
 - (NSImage*)imageForKey:(NSString*)key;
-- (void)setImage:(NSImage*)anImage forKey:(NSString*)key; // withTimeoutInterval: 1 day
+- (void)setImage:(NSImage*)anImage forKey:(NSString*)key; // withTimeoutInterval:defaultTimeoutInterval
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 #endif
 
+@property(nonatomic,assign) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
 @end

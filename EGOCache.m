@@ -12,15 +12,25 @@
 
 #import "EGOCache.h"
 
+#if DEBUG
+	#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) { \
+		NSLog(@"EGOCache.plist is a reserved key and can not be modified."); \
+		return; }
+#else
+	#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
+#endif
+
+
+
 static NSString* _EGOCacheDirectory;
 
 static inline NSString* EGOCacheDirectory() {
 	if(!_EGOCacheDirectory) {
 #ifdef TARGET_OS_IPHONE
-		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Caches/EGOCache"] retain];
+		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Caches/EGOCache"] copy];
 #else
 		NSString* appSupportDir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] retain];
+		_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
 #endif
 	}
 	
@@ -31,7 +41,7 @@ static inline NSString* cachePathForKey(NSString* key) {
 	return [EGOCacheDirectory() stringByAppendingPathComponent:key];
 }
 
-static id __instance;
+static EGOCache* __instance;
 
 @interface EGOCache ()
 - (void)removeItemFromCache:(NSString*)key;
@@ -42,11 +52,13 @@ static id __instance;
 #pragma mark -
 
 @implementation EGOCache
+@synthesize defaultTimeoutInterval;
 
 + (EGOCache*)currentCache {
 	@synchronized(self) {
 		if(!__instance) {
 			__instance = [[EGOCache alloc] init];
+			__instance.defaultTimeoutInterval = 86400;
 		}
 	}
 	
@@ -55,7 +67,7 @@ static id __instance;
 
 - (id)init {
 	if((self = [super init])) {
-		NSDictionary* dict = [[NSUserDefaults standardUserDefaults] objectForKey:@"EGOCache"];
+		NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:cachePathForKey(@"EGOCache.plist")];
 		
 		if([dict isKindOfClass:[NSDictionary class]]) {
 			cacheDictionary = [dict mutableCopy];
@@ -89,15 +101,17 @@ static id __instance;
 	[self saveCacheDictionary];
 }
 
-- (void)clearCache:(NSString*)key {
+- (void)removeCacheForKey:(NSString*)key {
+	CHECK_FOR_EGOCACHE_PLIST();
+
 	[self removeItemFromCache:key];
 	[self saveCacheDictionary];
 }
 
 - (void)removeItemFromCache:(NSString*)key {
-	NSString *cachePath = cachePathForKey(key);
+	NSString* cachePath = cachePathForKey(key);
 	
-	NSInvocation *deleteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(deleteDataAtPath:)]];
+	NSInvocation* deleteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(deleteDataAtPath:)]];
 	[deleteInvocation setTarget:self];
 	[deleteInvocation setSelector:@selector(deleteDataAtPath:)];
 	[deleteInvocation setArgument:&cachePath atIndex:2];
@@ -117,12 +131,14 @@ static id __instance;
 #pragma mark Data methods
 
 - (void)setData:(NSData*)data forKey:(NSString*)key {
-	[self setData:data forKey:key withTimeoutInterval:60 * 60 * 24];
+	[self setData:data forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
 }
 
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	NSString *cachePath = cachePathForKey(key);
-	NSInvocation *writeInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
+	CHECK_FOR_EGOCACHE_PLIST();
+	
+	NSString* cachePath = cachePathForKey(key);
+	NSInvocation* writeInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
 	[writeInvocation setTarget:self];
 	[writeInvocation setSelector:@selector(writeData:toPath:)];
 	[writeInvocation setArgument:&data atIndex:2];
@@ -134,7 +150,7 @@ static id __instance;
 	[self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES]; // Need to make sure the save delay get scheduled in the main runloop, not the current threads
 }
 
-- (void)saveAfterDelay { // Prevents multiple-rapid user defaults saves from happening, which will slow down your app
+- (void)saveAfterDelay { // Prevents multiple-rapid saves from happening, which will slow down your app
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(saveCacheDictionary) object:nil];
 	[self performSelector:@selector(saveCacheDictionary) withObject:nil afterDelay:0.3];
 }
@@ -157,8 +173,7 @@ static id __instance;
 
 - (void)saveCacheDictionary {
 	@synchronized(self) {
-		[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
-		[[NSUserDefaults standardUserDefaults] synchronize];
+		[cacheDictionary writeToFile:cachePathForKey(@"EGOCache.plist") atomically:YES];
 	}
 }
 
@@ -170,7 +185,7 @@ static id __instance;
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
-	[self setString:aString forKey:key withTimeoutInterval:60 * 60 * 24];
+	[self setString:aString forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -187,7 +202,7 @@ static id __instance;
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:60 * 60 * 24];
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -202,7 +217,7 @@ static id __instance;
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:60 * 60 * 24];
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeInterval];
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
