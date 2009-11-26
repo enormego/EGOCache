@@ -20,8 +20,10 @@
 }
 
 + (EGOCache*)currentCache;
-- (void)clearCache; // This is blocking, and may take a while.
 
+- (void)clearCache; // This is blocking, and may take a while.
+- (void)clearCache:(NSString*)key;
+  
 - (BOOL)hasCacheForKey:(NSString*)key;
 
 - (NSData*)dataForKey:(NSString*)key;

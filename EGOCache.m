@@ -75,12 +75,21 @@ static id __instance;
 
 - (void)clearCache {
 	for(NSString* key in cacheDictionary) {
-		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
+    [self removeItemFromCache:key];
 	}
-	
-	[cacheDictionary removeAllObjects];
 	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
 	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)clearCache:(NSString*)key {
+  [self removeItemFromCache:key]
+  [[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)removeItemFromCache:(NSString*)key {
+  [[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
+  [cacheDictionary removeObectForKey:key]
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
