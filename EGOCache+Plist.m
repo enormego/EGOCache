@@ -7,6 +7,8 @@
 // error and a crash. The docs suggest format is a pointer whereas NSPropertyList.h
 // suggests otherwise. A bug in NSPropertListSerialization? Either way, it seems
 // to work without specifying the format when deserializing.
+//
+// see http://openradar.appspot.com/radar?id=121401
 
 - (NSData*)plistForKey:(NSString*)key;
 {  
