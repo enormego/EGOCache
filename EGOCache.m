@@ -77,14 +77,12 @@ static id __instance;
 	for(NSString* key in cacheDictionary) {
     [self removeItemFromCache:key];
 	}
-	[[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
+	[self saveCacheDictionary];
 }
 
 - (void)clearCache:(NSString*)key {
-  [self removeItemFromCache:key]
-  [[NSUserDefaults standardUserDefaults] setObject:cacheDictionary forKey:@"EGOCache"];
-	[[NSUserDefaults standardUserDefaults] synchronize];
+  [self removeItemFromCache:key];
+  [self saveCacheDictionary];
 }
 
 - (void)removeItemFromCache:(NSString*)key {
