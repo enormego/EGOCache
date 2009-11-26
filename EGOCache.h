@@ -45,5 +45,9 @@
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 #endif
 
+- (NSData*)plistForKey:(NSString*)key;
+- (void)setPlist:(id)plistObject forKey:(NSString*)key; // withTimeoutInterval:defaultTimeoutInterval
+- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
 @property(nonatomic,assign) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
 @end

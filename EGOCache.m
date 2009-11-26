@@ -217,7 +217,7 @@ static EGOCache* __instance;
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeInterval];
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -226,6 +226,31 @@ static EGOCache* __instance;
 }
 
 #endif
+
+#pragma mark -
+#pragma mark Property List methods
+
+- (NSData*)plistForKey:(NSString*)key; {  
+	NSData* plistData = [self dataForKey:key];
+	
+	return [NSPropertyListSerialization propertyListFromData:plistData
+											mutabilityOption:NSPropertyListImmutable
+													  format:nil
+											errorDescription:nil];
+}
+
+- (void)setPlist:(id)plistObject forKey:(NSString*)key; {
+	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+
+- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval; {
+	// Binary plists are used over XML for better performance
+	NSData* plistData = [NSPropertyListSerialization dataFromPropertyList:plistObject 
+																   format:NSPropertyListBinaryFormat_v1_0
+														 errorDescription:NULL];
+	
+	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval];
+}
 
 #pragma mark -
 #pragma mark Disk writing operations
