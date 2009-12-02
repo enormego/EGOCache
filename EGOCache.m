@@ -29,8 +29,8 @@ static inline NSString* EGOCacheDirectory() {
 #ifdef TARGET_OS_IPHONE
 		_EGOCacheDirectory = [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Caches/EGOCache"] copy];
 #else
-		NSString* cacheSupportDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		_EGOCacheDirectory = [[[cacheSupportDir stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
+		NSString* appSupportDir = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+		_EGOCacheDirectory = [[[appSupportDir stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
 #endif
 	}
 	
@@ -94,7 +94,7 @@ static EGOCache* __instance;
 }
 
 - (void)clearCache {
-	for(NSString* key in cacheDictionary) {
+	for(NSString* key in [cacheDictionary allKeys]) {
 		[self removeItemFromCache:key];
 	}
 	
