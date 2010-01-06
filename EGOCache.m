@@ -128,6 +128,19 @@ static EGOCache* __instance;
 }
 
 #pragma mark -
+#pragma mark Copy file methods
+
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key {
+	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(key) error:NULL];
+	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
+	[self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES];
+}																												   
+
+#pragma mark -
 #pragma mark Data methods
 
 - (void)setData:(NSData*)data forKey:(NSString*)key {
