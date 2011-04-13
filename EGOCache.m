@@ -221,7 +221,7 @@ static EGOCache* __instance;
 #if TARGET_OS_IPHONE
 
 - (UIImage*)imageForKey:(NSString*)key {
-	return [UIImage imageWithData:[self dataForKey:key]];
+	return [UIImage imageWithContentsOfFile:cachePathForKey(key)];
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
