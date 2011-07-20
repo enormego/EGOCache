@@ -279,7 +279,11 @@ static EGOCache* __instance;
 #pragma mark Object methods
 
 - (id<NSCoding>)objectForKey:(NSString*)key {
-	return [NSKeyedUnarchiver unarchiveObjectWithData:[self dataForKey:key]];
+	if([self hasCacheForKey:key]) {
+		return [NSKeyedUnarchiver unarchiveObjectWithData:[self dataForKey:key]];
+	} else {
+		return nil;
+	}
 }
 
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key {
