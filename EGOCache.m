@@ -27,14 +27,18 @@
 #import "EGOCache.h"
 
 #if DEBUG
-	#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) { \
-		NSLog(@"EGOCache.plist is a reserved key and can not be modified."); \
-		return; }
+#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) { \
+NSLog(@"EGOCache.plist is a reserved key and can not be modified."); \
+return; }
 #else
-	#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
+#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
 #endif
 
-
+#ifdef __has_feature
+#define EGO_NO_ARC !__has_feature(objc_arc)
+#else
+#define EGO_NO_ARC 1
+#endif
 
 static NSString* _EGOCacheDirectory;
 
@@ -88,9 +92,9 @@ static EGOCache* __instance;
 		diskOperationQueue = [[NSOperationQueue alloc] init];
 		
 		[[NSFileManager defaultManager] createDirectoryAtPath:EGOCacheDirectory() 
-								  withIntermediateDirectories:YES 
-												   attributes:nil 
-														error:NULL];
+                              withIntermediateDirectories:YES 
+                                               attributes:nil 
+                                                    error:NULL];
 		
 		for(NSString* key in cacheDictionary) {
 			NSDate* date = [cacheDictionary objectForKey:key];
@@ -113,7 +117,7 @@ static EGOCache* __instance;
 
 - (void)removeCacheForKey:(NSString*)key {
 	CHECK_FOR_EGOCACHE_PLIST();
-
+  
 	[self removeItemFromCache:key];
 	[self saveCacheDictionary];
 }
@@ -204,7 +208,11 @@ static EGOCache* __instance;
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
-	return [[[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding] autorelease];
+  NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+#if EGO_NO_ARC
+  return [string autorelease];
+#endif
+  return string;
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
@@ -245,7 +253,7 @@ static EGOCache* __instance;
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
-		   forKey:key withTimeoutInterval:timeoutInterval];
+         forKey:key withTimeoutInterval:timeoutInterval];
 }
 
 #endif
@@ -257,9 +265,9 @@ static EGOCache* __instance;
 	NSData* plistData = [self dataForKey:key];
 	
 	return [NSPropertyListSerialization propertyListFromData:plistData
-											mutabilityOption:NSPropertyListImmutable
-													  format:nil
-											errorDescription:nil];
+                                          mutabilityOption:NSPropertyListImmutable
+                                                    format:nil
+                                          errorDescription:nil];
 }
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key; {
@@ -269,8 +277,8 @@ static EGOCache* __instance;
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval; {
 	// Binary plists are used over XML for better performance
 	NSData* plistData = [NSPropertyListSerialization dataFromPropertyList:plistObject 
-																   format:NSPropertyListBinaryFormat_v1_0
-														 errorDescription:NULL];
+                                                                 format:NSPropertyListBinaryFormat_v1_0
+                                                       errorDescription:NULL];
 	
 	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval];
 }
@@ -281,15 +289,19 @@ static EGOCache* __instance;
 - (void)performDiskWriteOperation:(NSInvocation *)invoction {
 	NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:invoction];
 	[diskOperationQueue addOperation:operation];
+#if EGO_NO_ARC
 	[operation release];
+#endif
 }
 
 #pragma mark -
 
 - (void)dealloc {
+#if EGO_NO_ARC
 	[diskOperationQueue release];
 	[cacheDictionary release];
 	[super dealloc];
+#endif
 }
 
 @end
