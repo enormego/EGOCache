@@ -284,6 +284,25 @@ static EGOCache* __instance;
 }
 
 #pragma mark -
+#pragma mark Object methods
+
+- (id<NSCoding>)objectForKey:(NSString*)key {
+	if([self hasCacheForKey:key]) {
+		return [NSKeyedUnarchiver unarchiveObjectWithData:[self dataForKey:key]];
+	} else {
+		return nil;
+	}
+}
+
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key {
+	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	[self setData:[NSKeyedArchiver archivedDataWithRootObject:anObject] forKey:key withTimeoutInterval:timeoutInterval];
+}
+
+#pragma mark -
 #pragma mark Disk writing operations
 
 - (void)performDiskWriteOperation:(NSInvocation *)invoction {
