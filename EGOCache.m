@@ -96,11 +96,16 @@ static EGOCache* __instance;
                                                attributes:nil 
                                                     error:NULL];
 		
+		NSMutableArray *removeList = [NSMutableArray array];
 		for(NSString* key in cacheDictionary) {
 			NSDate* date = [cacheDictionary objectForKey:key];
 			if([[[NSDate date] earlierDate:date] isEqualToDate:date]) {
+				[removeList addObject:key];
 				[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
 			}
+		}
+		if ([removeList count] > 0) {
+			[cacheDictionary removeObjectsForKeys:removeList];
 		}
 	}
 	
