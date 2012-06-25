@@ -59,7 +59,7 @@ static EGOCache* __instance;
 
 @interface EGOCache ()
 - (void)removeItemFromCache:(NSString*)key;
-- (void)performDiskWriteOperation:(NSInvocation *)invoction;
+- (void)performDiskWriteOperation:(NSInvocation *)invocation;
 - (void)saveCacheDictionary;
 @end
 
@@ -310,8 +310,8 @@ static EGOCache* __instance;
 #pragma mark -
 #pragma mark Disk writing operations
 
-- (void)performDiskWriteOperation:(NSInvocation *)invoction {
-	NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:invoction];
+- (void)performDiskWriteOperation:(NSInvocation *)invocation {
+	NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:invocation];
 	[diskOperationQueue addOperation:operation];
 #if EGO_NO_ARC
 	[operation release];
