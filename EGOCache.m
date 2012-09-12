@@ -213,11 +213,15 @@ static EGOCache* __instance;
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
-  NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+	if ([self hasCacheForKey:key]) {
+		NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
 #if EGO_NO_ARC
-  return [string autorelease];
+		return [string autorelease];
 #endif
-  return string;
+		return string;
+	}
+	
+	return nil;
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
