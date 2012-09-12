@@ -127,6 +127,16 @@ static EGOCache* __instance;
 	[self saveCacheDictionary];
 }
 
+- (void)removeCacheForKeysThatBeginWith:(NSString *)str {
+	for(NSString* key in [cacheDictionary allKeys]) {
+		if (key.length >= str.length && [[key substringToIndex:str.length] isEqualToString:str]) {
+			[self removeItemFromCache:key];
+		}
+	}
+	
+	[self saveCacheDictionary];
+}
+
 - (void)removeItemFromCache:(NSString*)key {
 	NSString* cachePath = cachePathForKey(key);
 	
