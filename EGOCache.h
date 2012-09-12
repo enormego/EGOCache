@@ -38,6 +38,7 @@
 
 - (void)clearCache;
 - (void)removeCacheForKey:(NSString*)key;
+- (void)removeCacheForKeysThatBeginWith:(NSString*)str;
 
 - (BOOL)hasCacheForKey:(NSString*)key;
 

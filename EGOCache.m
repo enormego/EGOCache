@@ -127,6 +127,16 @@ static EGOCache* __instance;
 	[self saveCacheDictionary];
 }
 
+- (void)removeCacheForKeysThatBeginWith:(NSString *)str {
+	for(NSString* key in [cacheDictionary allKeys]) {
+		if (key.length >= str.length && [[key substringToIndex:str.length] isEqualToString:str]) {
+			[self removeItemFromCache:key];
+		}
+	}
+	
+	[self saveCacheDictionary];
+}
+
 - (void)removeItemFromCache:(NSString*)key {
 	NSString* cachePath = cachePathForKey(key);
 	
@@ -213,11 +223,15 @@ static EGOCache* __instance;
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
-  NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+	if ([self hasCacheForKey:key]) {
+		NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
 #if EGO_NO_ARC
-  return [string autorelease];
+		return [string autorelease];
 #endif
-  return string;
+		return string;
+	}
+	
+	return nil;
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
@@ -249,7 +263,11 @@ static EGOCache* __instance;
 #else
 
 - (NSImage*)imageForKey:(NSString*)key {
-	return [[[NSImage alloc] initWithData:[self dataForKey:key]] autorelease];
+	NSImage* image = [[NSImage alloc] initWithData:[self dataForKey:key]];
+#if EGO_NO_ARC
+	return [image autorelease];
+#endif
+	return image;
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
