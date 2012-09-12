@@ -249,7 +249,11 @@ static EGOCache* __instance;
 #else
 
 - (NSImage*)imageForKey:(NSString*)key {
-	return [[[NSImage alloc] initWithData:[self dataForKey:key]] autorelease];
+	NSImage* image = [[NSImage alloc] initWithData:[self dataForKey:key]];
+#if EGO_NO_ARC
+	return [image autorelease];
+#endif
+	return image;
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
