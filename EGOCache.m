@@ -3,7 +3,7 @@
 //  enormego
 //
 //  Created by Shaun Harrison on 7/4/09.
-//  Copyright (c) 2009-2010 enormego
+//  Copyright (c) 2009-2012 enormego
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,116 +34,167 @@ return; }
 #define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
 #endif
 
-#ifdef __has_feature
-#define EGO_NO_ARC !__has_feature(objc_arc)
-#else
-#define EGO_NO_ARC 1
-#endif
-
-static NSString* _EGOCacheDirectory;
-
-static inline NSString* EGOCacheDirectory() {
-	if(!_EGOCacheDirectory) {
-		NSString* cachesDirectory = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-		_EGOCacheDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
-	}
-	
-	return _EGOCacheDirectory;
+static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
+	return [directory stringByAppendingPathComponent:key];
 }
-
-static inline NSString* cachePathForKey(NSString* key) {
-	return [EGOCacheDirectory() stringByAppendingPathComponent:key];
-}
-
-static EGOCache* __instance;
-
-@interface EGOCache ()
-- (void)removeItemFromCache:(NSString*)key;
-- (void)performDiskWriteOperation:(NSInvocation *)invocation;
-- (void)saveCacheDictionary;
-@end
 
 #pragma mark -
 
-@implementation EGOCache
-@synthesize defaultTimeoutInterval;
+@interface EGOCache () {
+	dispatch_queue_t _cacheInfoQueue;
+	dispatch_queue_t _frozenCacheInfoQueue;
+	dispatch_queue_t _diskQueue;
+	NSMutableDictionary* _cacheInfo;
+	NSString* _directory;
+	BOOL _needsSave;
+}
 
-+ (EGOCache*)currentCache {
-	@synchronized(self) {
-		if(!__instance) {
-			__instance = [[EGOCache alloc] init];
-			__instance.defaultTimeoutInterval = 86400;
-		}
-	}
+@property(nonatomic,copy) NSDictionary* frozenCacheInfo;
+@end
+
+@implementation EGOCache
+
++ (instancetype)currentCache {
+	return [self globalCache];
+}
+
++ (instancetype)globalCache {
+	static id instance;
 	
-	return __instance;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		instance = [[[self class] alloc] init];
+		[instance setDefaultTimeoutInterval:86400];
+	});
+	
+	return instance;
 }
 
 - (id)init {
+	NSString* cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+	NSString* oldCachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
+
+	if([[NSFileManager defaultManager] fileExistsAtPath:oldCachesDirectory]) {
+		[[NSFileManager defaultManager] removeItemAtPath:oldCachesDirectory error:NULL];
+	}
+	
+	cachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
+	return [self initWithCacheDirectory:cachesDirectory];
+}
+
+- (id)initWithCacheDirectory:(NSString*)cacheDirectory {
 	if((self = [super init])) {
-		NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:cachePathForKey(@"EGOCache.plist")];
+
+		_cacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info", DISPATCH_QUEUE_SERIAL);
+		dispatch_queue_t priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+		dispatch_set_target_queue(priority, _cacheInfoQueue);
 		
-		if([dict isKindOfClass:[NSDictionary class]]) {
-			cacheDictionary = [dict mutableCopy];
-		} else {
-			cacheDictionary = [[NSMutableDictionary alloc] init];
+		_frozenCacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info.frozen", DISPATCH_QUEUE_SERIAL);
+		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+		dispatch_set_target_queue(priority, _frozenCacheInfoQueue);
+		
+		_diskQueue = dispatch_queue_create("com.enormego.egocache.disk", DISPATCH_QUEUE_CONCURRENT);
+		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
+		dispatch_set_target_queue(priority, _cacheInfoQueue);
+		
+		
+		_directory = cacheDirectory;
+
+		_cacheInfo = [[NSDictionary dictionaryWithContentsOfFile:cachePathForKey(_directory, @"EGOCache.plist")] mutableCopy];
+		
+		if(!_cacheInfo) {
+			_cacheInfo = [[NSMutableDictionary alloc] init];
 		}
 		
-		diskOperationQueue = [[NSOperationQueue alloc] init];
+		[[NSFileManager defaultManager] createDirectoryAtPath:_directory withIntermediateDirectories:YES attributes:nil error:NULL];
 		
-		[[NSFileManager defaultManager] createDirectoryAtPath:EGOCacheDirectory() 
-                              withIntermediateDirectories:YES 
-                                               attributes:nil 
-                                                    error:NULL];
+		NSTimeInterval now = [[NSDate date] timeIntervalSinceReferenceDate];
+		NSMutableArray* removedKeys = [[NSMutableArray alloc] init];
 		
-		NSMutableArray *removeList = [NSMutableArray array];
-		for(NSString* key in cacheDictionary) {
-			NSDate* date = [cacheDictionary objectForKey:key];
-			if([[[NSDate date] earlierDate:date] isEqualToDate:date]) {
-				[removeList addObject:key];
-				[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(key) error:NULL];
+		for(NSString* key in _cacheInfo) {
+			if([_cacheInfo[key] timeIntervalSinceReferenceDate] <= now) {
+				[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+				[removedKeys addObject:key];
 			}
 		}
-		if ([removeList count] > 0) {
-			[cacheDictionary removeObjectsForKeys:removeList];
-		}
+		
+		[_cacheInfo removeObjectsForKeys:removedKeys];
+		self.frozenCacheInfo = _cacheInfo;
 	}
 	
 	return self;
 }
 
 - (void)clearCache {
-	for(NSString* key in [cacheDictionary allKeys]) {
-		[self removeItemFromCache:key];
-	}
-	
-	[self saveCacheDictionary];
+	dispatch_sync(_cacheInfoQueue, ^{
+		for(NSString* key in _cacheInfo) {
+			[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+		}
+		
+		[_cacheInfo removeAllObjects];
+		
+		dispatch_sync(_frozenCacheInfoQueue, ^{
+			self.frozenCacheInfo = [_cacheInfo copy];
+		});
+
+		[self setNeedsSave];
+	});
 }
 
 - (void)removeCacheForKey:(NSString*)key {
 	CHECK_FOR_EGOCACHE_PLIST();
-  
-	[self removeItemFromCache:key];
-	[self saveCacheDictionary];
-}
 
-- (void)removeItemFromCache:(NSString*)key {
-	NSString* cachePath = cachePathForKey(key);
-	
-	NSInvocation* deleteInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(deleteDataAtPath:)]];
-	[deleteInvocation setTarget:self];
-	[deleteInvocation setSelector:@selector(deleteDataAtPath:)];
-	[deleteInvocation setArgument:&cachePath atIndex:2];
-	
-	[self performDiskWriteOperation:deleteInvocation];
-	[cacheDictionary removeObjectForKey:key];
+	dispatch_async(_diskQueue, ^{
+		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+	});
+
+	[self setCacheTimeoutInterval:0 forKey:key];
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
-	NSDate* date = [cacheDictionary objectForKey:key];
+	__block NSDate* date = nil;;
+	
+	dispatch_sync(_frozenCacheInfoQueue, ^{
+		date = (self.frozenCacheInfo)[key];
+	});
+	
 	if(!date) return NO;
-	if([[[NSDate date] earlierDate:date] isEqualToDate:date]) return NO;
-	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(key)];
+	if([date compare:[NSDate date]] != NSOrderedDescending) return NO;
+	
+	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(_directory, key)];
+}
+
+- (void)setCacheTimeoutInterval:(NSTimeInterval)timeoutInterval forKey:(NSString*)key {
+	NSDate* date = timeoutInterval > 0 ? [NSDate dateWithTimeIntervalSinceNow:timeoutInterval] : nil;
+	
+	// Temporarily store in the frozen state for quick reads
+	dispatch_sync(_frozenCacheInfoQueue, ^{
+		NSMutableDictionary* info = [self.frozenCacheInfo mutableCopy];
+		
+		if(date) {
+			info[key] = date;
+		} else {
+			[info removeObjectForKey:key];
+		}
+		
+		self.frozenCacheInfo = info;
+	});
+	
+	
+	// Save the final copy (this may be blocked by other operations)
+	dispatch_async(_cacheInfoQueue, ^{
+		if(date) {
+			_cacheInfo[key] = date;
+		} else {
+			[_cacheInfo removeObjectForKey:key];
+		}
+		
+		dispatch_sync(_frozenCacheInfoQueue, ^{
+			self.frozenCacheInfo = [_cacheInfo copy];
+		});
+
+		[self setNeedsSave];
+	});
 }
 
 #pragma mark -
@@ -154,10 +205,12 @@ static EGOCache* __instance;
 }
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(key) error:NULL];
-	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
-	[self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES];
-}																												   
+	dispatch_async(_diskQueue, ^{
+		[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
+	});
+	
+	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
+}
 
 #pragma mark -
 #pragma mark Data methods
@@ -169,43 +222,35 @@ static EGOCache* __instance;
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	CHECK_FOR_EGOCACHE_PLIST();
 	
-	NSString* cachePath = cachePathForKey(key);
-	NSInvocation* writeInvocation = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:@selector(writeData:toPath:)]];
-	[writeInvocation setTarget:self];
-	[writeInvocation setSelector:@selector(writeData:toPath:)];
-	[writeInvocation setArgument:&data atIndex:2];
-	[writeInvocation setArgument:&cachePath atIndex:3];
+	NSString* cachePath = cachePathForKey(_directory, key);
 	
-	[self performDiskWriteOperation:writeInvocation];
-	[cacheDictionary setObject:[NSDate dateWithTimeIntervalSinceNow:timeoutInterval] forKey:key];
+	dispatch_async(_diskQueue, ^{
+		[data writeToFile:cachePath atomically:YES];
+	});
 	
-	[self performSelectorOnMainThread:@selector(saveAfterDelay) withObject:nil waitUntilDone:YES]; // Need to make sure the save delay get scheduled in the main runloop, not the current threads
+	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
 }
 
-- (void)saveAfterDelay { // Prevents multiple-rapid saves from happening, which will slow down your app
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(saveCacheDictionary) object:nil];
-	[self performSelector:@selector(saveCacheDictionary) withObject:nil afterDelay:0.3];
+- (void)setNeedsSave {
+	dispatch_async(_cacheInfoQueue, ^{
+		if(_needsSave) return;
+		_needsSave = YES;
+		
+		double delayInSeconds = 0.5;
+		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+		dispatch_after(popTime, _cacheInfoQueue, ^(void){
+			if(!_needsSave) return;
+			[_cacheInfo writeToFile:cachePathForKey(_directory, @"EGOCache.plist") atomically:YES];
+			_needsSave = NO;
+		});
+	});
 }
 
 - (NSData*)dataForKey:(NSString*)key {
 	if([self hasCacheForKey:key]) {
-		return [NSData dataWithContentsOfFile:cachePathForKey(key) options:0 error:NULL];
+		return [NSData dataWithContentsOfFile:cachePathForKey(_directory, key) options:0 error:NULL];
 	} else {
 		return nil;
-	}
-}
-
-- (void)writeData:(NSData*)data toPath:(NSString *)path; {
-	[data writeToFile:path atomically:YES];
-} 
-
-- (void)deleteDataAtPath:(NSString *)path {
-	[[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
-}
-
-- (void)saveCacheDictionary {
-	@synchronized(self) {
-		[cacheDictionary writeToFile:cachePathForKey(@"EGOCache.plist") atomically:YES];
 	}
 }
 
@@ -213,11 +258,7 @@ static EGOCache* __instance;
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
-  NSString *string = [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
-#if EGO_NO_ARC
-  return [string autorelease];
-#endif
-  return string;
+	return [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
@@ -234,7 +275,15 @@ static EGOCache* __instance;
 #if TARGET_OS_IPHONE
 
 - (UIImage*)imageForKey:(NSString*)key {
-	return [UIImage imageWithContentsOfFile:cachePathForKey(key)];
+	UIImage* image = nil;
+	
+	@try {
+		image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
+	} @catch (NSException* e) {
+		// Surpress any unarchiving exceptions and continue with nil
+	}
+	
+	return image;
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
@@ -242,7 +291,12 @@ static EGOCache* __instance;
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	[self setData:UIImagePNGRepresentation(anImage) forKey:key withTimeoutInterval:timeoutInterval];
+	@try {
+		// Using NSKeyedArchiver preserves all information such as scale, orientation, and the proper image format instead of saving everything as pngs
+		[self setData:[NSKeyedArchiver archivedDataWithRootObject:anImage] forKey:key withTimeoutInterval:timeoutInterval];
+	} @catch (NSException* e) {
+		// Something went wrong, but we'll fail silently.
+	}
 }
 
 
@@ -258,7 +312,7 @@ static EGOCache* __instance;
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
-         forKey:key withTimeoutInterval:timeoutInterval];
+		   forKey:key withTimeoutInterval:timeoutInterval];
 }
 
 #endif
@@ -270,9 +324,9 @@ static EGOCache* __instance;
 	NSData* plistData = [self dataForKey:key];
 	
 	return [NSPropertyListSerialization propertyListFromData:plistData
-                                          mutabilityOption:NSPropertyListImmutable
-                                                    format:nil
-                                          errorDescription:nil];
+											mutabilityOption:NSPropertyListImmutable
+													  format:nil
+											errorDescription:nil];
 }
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key; {
@@ -282,8 +336,8 @@ static EGOCache* __instance;
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval; {
 	// Binary plists are used over XML for better performance
 	NSData* plistData = [NSPropertyListSerialization dataFromPropertyList:plistObject 
-                                                                 format:NSPropertyListBinaryFormat_v1_0
-                                                       errorDescription:NULL];
+																   format:NSPropertyListBinaryFormat_v1_0
+														 errorDescription:NULL];
 	
 	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval];
 }
@@ -308,24 +362,9 @@ static EGOCache* __instance;
 }
 
 #pragma mark -
-#pragma mark Disk writing operations
-
-- (void)performDiskWriteOperation:(NSInvocation *)invocation {
-	NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:invocation];
-	[diskOperationQueue addOperation:operation];
-#if EGO_NO_ARC
-	[operation release];
-#endif
-}
-
-#pragma mark -
 
 - (void)dealloc {
-#if EGO_NO_ARC
-	[diskOperationQueue release];
-	[cacheDictionary release];
-	[super dealloc];
-#endif
+
 }
 
 @end

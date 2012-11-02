@@ -3,7 +3,7 @@
 //  enormego
 //
 //  Created by Shaun Harrison on 7/4/09.
-//  Copyright (c) 2009-2010 enormego
+//  Copyright (c) 2009-2012 enormego
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,14 +27,15 @@
 #import <Foundation/Foundation.h>
 
 
-@interface EGOCache : NSObject {
-@private
-	NSMutableDictionary* cacheDictionary;
-	NSOperationQueue* diskOperationQueue;
-	NSTimeInterval defaultTimeoutInterval;
-}
+@interface EGOCache : NSObject
 
-+ (EGOCache*)currentCache;
++ (instancetype)currentCache __deprecated; // Renamed to globalCache
+
+// Global cache for easy use
++ (instancetype)globalCache;
+
+// Opitionally create a different EGOCache instance with it's own cache directory
+- (id)initWithCacheDirectory:(NSString*)cacheDirectory;
 
 - (void)clearCache;
 - (void)removeCacheForKey:(NSString*)key;
