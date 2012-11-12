@@ -303,7 +303,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #else
 
 - (NSImage*)imageForKey:(NSString*)key {
-	return [[[NSImage alloc] initWithData:[self dataForKey:key]] autorelease];
+	return [[NSImage alloc] initWithData:[self dataForKey:key]];
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
