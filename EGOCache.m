@@ -364,7 +364,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark -
 
 - (void)dealloc {
-
+    [super dealloc];
 }
 
 @end
