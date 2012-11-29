@@ -159,9 +159,18 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	});
 	
 	if(!date) return NO;
-	if([date compare:[NSDate date]] != NSOrderedDescending) return NO;
-	
-	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(_directory, key)];
+	else if([date compare:[NSDate date]] != NSOrderedDescending) return NO;
+	else if([[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(_directory, key)]){
+        if (self.keepAliveCache) { // if keepAliveCache is active, the due date for this cache is increased so it don't get removed
+            NSDate *increasedDate=[NSDate dateWithTimeIntervalSinceNow:self.defaultTimeoutInterval];
+            if ([[date earlierDate:increasedDate]isEqualToDate:date]) {                
+                [self setCacheTimeoutInterval:self.defaultTimeoutInterval forKey:key];
+            }
+        }
+        return YES;
+    }else{
+        return NO;
+    }
 }
 
 - (void)setCacheTimeoutInterval:(NSTimeInterval)timeoutInterval forKey:(NSString*)key {
@@ -258,7 +267,11 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
-	return [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+    if ([self hasCacheForKey:key]) {
+        return [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+    }else{
+        return @"";
+    }
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
@@ -276,13 +289,13 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (UIImage*)imageForKey:(NSString*)key {
 	UIImage* image = nil;
-	
-	@try {
-		image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
-	} @catch (NSException* e) {
-		// Surpress any unarchiving exceptions and continue with nil
-	}
-	
+	if ([self hasCacheForKey:key]) {
+        @try {
+            image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
+        } @catch (NSException* e) {
+            // Surpress any unarchiving exceptions and continue with nil
+        }
+    }
 	return image;
 }
 
@@ -303,7 +316,11 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #else
 
 - (NSImage*)imageForKey:(NSString*)key {
-	return [[NSImage alloc] initWithData:[self dataForKey:key]];
+    if ([self hasCacheForKey:key]) {
+        return [[NSImage alloc] initWithData:[self dataForKey:key]];
+    }else{
+        return nil;
+    }    
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
