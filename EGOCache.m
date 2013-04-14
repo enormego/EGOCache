@@ -64,7 +64,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		instance = [[[self class] alloc] init];
-		[instance setDefaultTimeoutInterval:86400];
 	});
 	
 	return instance;
@@ -120,6 +119,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		
 		[_cacheInfo removeObjectsForKeys:removedKeys];
 		self.frozenCacheInfo = _cacheInfo;
+		[self setDefaultTimeoutInterval:86400];
 	}
 	
 	return self;
