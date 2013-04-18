@@ -274,13 +274,34 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 #if TARGET_OS_IPHONE
 
+#if EGO_USE_PNG_ARCHIVING_IOS
+
+- (UIImage*)imageForKey:(NSString*)key {
+    
+    UIImage *image = [[UIImage alloc] initWithContentsOfFile:cachePathForKey(_directory,key)];
+    
+	return image;
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
+    
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+    
+	[self setData:UIImagePNGRepresentation(anImage) forKey:key withTimeoutInterval:timeoutInterval];
+}
+
+#else 
+
 - (UIImage*)imageForKey:(NSString*)key {
 	UIImage* image = nil;
 	
 	@try {
 		image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
 	} @catch (NSException* e) {
-		// Surpress any unarchiving exceptions and continue with nil
+		NSLog(@"**[EGOCache imageForKey:] - Unarchive has failed for some reason. ARC has leaked. If you are seeing a lot of these messages (especially where you dont control endpoint) you may wish to \"#define EGO_USE_PNG_ARCHIVING_IOS 1\"");
 	}
 	
 	return image;
@@ -300,6 +321,9 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 
+
+#endif
+
 #else
 
 - (NSImage*)imageForKey:(NSString*)key {
@@ -314,6 +338,8 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	[self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
 		   forKey:key withTimeoutInterval:timeoutInterval];
 }
+
+
 
 #endif
 
