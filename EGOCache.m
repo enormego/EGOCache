@@ -152,16 +152,31 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
-	__block NSDate* date = nil;;
-	
-	dispatch_sync(_frozenCacheInfoQueue, ^{
-		date = (self.frozenCacheInfo)[key];
-	});
-	
+    NSDate* date = [self dateForKey:key];
 	if(!date) return NO;
 	if([date compare:[NSDate date]] != NSOrderedDescending) return NO;
 	
 	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(_directory, key)];
+}
+
+- (NSDate*)dateForKey:(NSString*)key {
+	__block NSDate* date = nil;
+
+	dispatch_sync(_frozenCacheInfoQueue, ^{
+		date = (self.frozenCacheInfo)[key];
+	});
+
+    return date;
+}
+
+- (NSArray*)allKeys {
+    __block NSArray* keys = nil;
+
+    dispatch_sync(_frozenCacheInfoQueue, ^{
+        keys = [self.frozenCacheInfo allKeys];
+    });
+
+    return keys;
 }
 
 - (void)setCacheTimeoutInterval:(NSTimeInterval)timeoutInterval forKey:(NSString*)key {
