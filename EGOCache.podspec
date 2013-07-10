@@ -5,8 +5,10 @@ Pod::Spec.new do |s|
   s.summary         = 'Fast Caching for Objective-C (iPhone & Mac Compatible)'
   s.homepage        = 'https://github.com/enormego/EGOCache'
   s.source          = {:git => 'https://github.com/enormego/EGOCache.git', :tag => 'v2.0'}
-  
-  s.platforms       = 'iOS', 'OSX'
+
+  # Deployment
+  s.ios.deployment_target = '4.3'
+  s.osx.deployment_target = '10.7'
   
   s.source_files    = '*.{h,m}'
   s.requires_arc    = true
