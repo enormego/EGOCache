@@ -377,6 +377,14 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 #pragma mark -
+#pragma mark Synchronisation
+
+- (void)waitForDiskWrites
+{
+    dispatch_sync(_diskQueue,^{});
+}
+
+#pragma mark -
 
 - (void)dealloc {
 
