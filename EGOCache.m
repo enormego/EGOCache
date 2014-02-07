@@ -93,8 +93,8 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		dispatch_set_target_queue(priority, _frozenCacheInfoQueue);
 		
 		_diskQueue = dispatch_queue_create("com.enormego.egocache.disk", DISPATCH_QUEUE_CONCURRENT);
-		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0);
-		dispatch_set_target_queue(priority, _cacheInfoQueue);
+		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+		dispatch_set_target_queue(priority, _diskQueue);
 		
 		
 		_directory = cacheDirectory;
