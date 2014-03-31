@@ -35,6 +35,7 @@ return; }
 #endif
 
 static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
+	key = [key stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
 	return [directory stringByAppendingPathComponent:key];
 }
 
