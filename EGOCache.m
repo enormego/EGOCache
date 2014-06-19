@@ -358,6 +358,33 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 #pragma mark -
+#pragma mark JSON Object methods
+
+- (id)jsonObjectForKey:(NSString*)key {
+	NSData* jsonData = [self dataForKey:key];
+
+	return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
+
+}
+
+- (id)mutableJsonObjectForKey:(NSString*)key {
+	NSData* jsonData = [self dataForKey:key];
+
+	return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+
+}
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key {
+	[self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+
+	[self setData:jsonData forKey:key withTimeoutInterval:timeoutInterval];
+}
+
+#pragma mark -
 #pragma mark Object methods
 
 - (id<NSCoding>)objectForKey:(NSString*)key {
