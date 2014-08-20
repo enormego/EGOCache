@@ -45,6 +45,8 @@
 
 - (BOOL)hasCacheForKey:(NSString*)key;
 
+- (NSString*)pathForKey:(NSString*)key;
+
 - (NSData*)dataForKey:(NSString*)key;
 - (void)setData:(NSData*)data forKey:(NSString*)key;
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;

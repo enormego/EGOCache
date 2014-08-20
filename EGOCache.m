@@ -220,11 +220,23 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+    CHECK_FOR_EGOCACHE_PLIST();
+    
 	dispatch_async(_diskQueue, ^{
 		[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
 	});
 	
 	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
+}
+
+#pragma mark Path methods
+
+- (NSString*)pathForKey:(NSString*)key {
+	if([self hasCacheForKey:key]) {
+		return cachePathForKey(_directory, key);
+	} else {
+		return nil;
+	}
 }
 
 #pragma mark -
@@ -306,7 +318,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	@try {
+    @try {
 		// Using NSKeyedArchiver preserves all information such as scale, orientation, and the proper image format instead of saving everything as pngs
 		[self setData:[NSKeyedArchiver archivedDataWithRootObject:anImage] forKey:key withTimeoutInterval:timeoutInterval];
 	} @catch (NSException* e) {
@@ -362,7 +374,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (id<NSCoding>)objectForKey:(NSString*)key {
 	if([self hasCacheForKey:key]) {
-		return [NSKeyedUnarchiver unarchiveObjectWithData:[self dataForKey:key]];
+		return [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
 	} else {
 		return nil;
 	}
@@ -374,12 +386,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[self setData:[NSKeyedArchiver archivedDataWithRootObject:anObject] forKey:key withTimeoutInterval:timeoutInterval];
-}
-
-#pragma mark -
-
-- (void)dealloc {
-
 }
 
 @end
