@@ -72,6 +72,11 @@
 - (void)setPlist:(id)plistObject forKey:(NSString*)key;
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 
+- (id)jsonObjectForKey:(NSString*)key;
+- (id)mutableJsonObjectForKey:(NSString*)key;
+- (void)setJson:(id)jsonObject forKey:(NSString*)key;
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key;
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;	
 

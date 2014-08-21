@@ -35,7 +35,8 @@ return; }
 #endif
 
 static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
-	return [directory stringByAppendingPathComponent:key];
+        key = [key stringByReplacingOccurrencesOfString:@"/" withString:@"_"];
+        return [directory stringByAppendingPathComponent:key];
 }
 
 #pragma mark -
@@ -367,6 +368,24 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 														 errorDescription:NULL];
 	
 	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval];
+}
+
+#pragma mark -
+#pragma mark JSON Object methods
+- (id)jsonObjectForKey:(NSString*)key {
+NSData* jsonData = [self dataForKey:key];
+return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
+}
+- (id)mutableJsonObjectForKey:(NSString*)key {
+NSData* jsonData = [self dataForKey:key];
+return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+}
+- (void)setJson:(id)jsonObject forKey:(NSString*)key {
+[self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+}
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+[self setData:jsonData forKey:key withTimeoutInterval:timeoutInterval];
 }
 
 #pragma mark -
