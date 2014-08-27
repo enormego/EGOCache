@@ -49,11 +49,15 @@
 
 - (NSData*)dataForKey:(NSString*)key;
 - (void)setData:(NSData*)data forKey:(NSString*)key;
+- (void)setData:(NSData*)data forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (NSString*)stringForKey:(NSString*)key;
 - (void)setString:(NSString*)aString forKey:(NSString*)key;
+- (void)setString:(NSString*)aString forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (NSDate*)dateForKey:(NSString*)key;
 - (NSArray*)allKeys;
@@ -61,28 +65,40 @@
 #if TARGET_OS_IPHONE
 - (UIImage*)imageForKey:(NSString*)key;
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key;
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 #else
 - (NSImage*)imageForKey:(NSString*)key;
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key;
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 #endif
 
 - (NSData*)plistForKey:(NSString*)key;
 - (void)setPlist:(id)plistObject forKey:(NSString*)key;
+- (void)setPlist:(id)plistObject forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (id)jsonObjectForKey:(NSString*)key;
 - (id)mutableJsonObjectForKey:(NSString*)key;
 - (void)setJson:(id)jsonObject forKey:(NSString*)key;
+- (void)setJson:(id)jsonObject forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key;
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;	
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;	
 
 - (id<NSCoding>)objectForKey:(NSString*)key;
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key;
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key synchronous:(BOOL)sync;
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 @property(nonatomic,assign) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
 @end

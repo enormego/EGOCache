@@ -217,16 +217,30 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark Copy file methods
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key {
-	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
+}
+
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key synchronous:(BOOL)sync{
+	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
 }
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+    [self copyFilePath:filePath asKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+
+- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
     CHECK_FOR_EGOCACHE_PLIST();
     
-	dispatch_async(_diskQueue, ^{
-		[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
-	});
-	
+    if (sync){
+        dispatch_sync(_diskQueue, ^{
+            [[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
+        });
+    }else{
+        dispatch_async(_diskQueue, ^{
+            [[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
+        });
+	}
+    
 	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
 }
 
@@ -244,17 +258,31 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark Data methods
 
 - (void)setData:(NSData*)data forKey:(NSString*)key {
-	[self setData:data forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setData:data forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
 
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+	[self setData:data forKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+
+- (void)setData:(NSData*)data forKey:(NSString*)key synchronous:(BOOL)sync{
+	[self setData:data forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
+
+- (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
 	CHECK_FOR_EGOCACHE_PLIST();
 	
 	NSString* cachePath = cachePathForKey(_directory, key);
 	
-	dispatch_async(_diskQueue, ^{
-		[data writeToFile:cachePath atomically:YES];
-	});
+    if (sync){
+        dispatch_sync(_diskQueue, ^{
+            [data writeToFile:cachePath atomically:YES];
+        });
+    }else{
+        dispatch_async(_diskQueue, ^{
+            [data writeToFile:cachePath atomically:YES];
+        });
+    }
 	
 	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
 }
@@ -290,11 +318,19 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
-	[self setString:aString forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+    [self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
+}
+
+- (void)setString:(NSString*)aString forKey:(NSString*)key synchronous:(BOOL)sync{
+    [self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	[self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:timeoutInterval];
+	[self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+
+- (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
+	[self setData:[aString dataUsingEncoding:NSUTF8StringEncoding] forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
 
 #pragma mark -
@@ -314,14 +350,22 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	return image;
 }
 
-- (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key{
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
 
-- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key synchronous:(BOOL)sync{
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval{
+    [self setImage:anImage forKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
     @try {
 		// Using NSKeyedArchiver preserves all information such as scale, orientation, and the proper image format instead of saving everything as pngs
-		[self setData:[NSKeyedArchiver archivedDataWithRootObject:anImage] forKey:key withTimeoutInterval:timeoutInterval];
+		[self setData:[NSKeyedArchiver archivedDataWithRootObject:anImage] forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 	} @catch (NSException* e) {
 		// Something went wrong, but we'll fail silently.
 	}
@@ -337,10 +381,16 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
 	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
 }
-
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key synchronous:(BOOL)sync{
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	[self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
-		   forKey:key withTimeoutInterval:timeoutInterval];
+		   forKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
+    [self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
+		   forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
 
 #endif
@@ -357,35 +407,54 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 											errorDescription:nil];
 }
 
-- (void)setPlist:(id)plistObject forKey:(NSString*)key; {
-	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+- (void)setPlist:(id)plistObject forKey:(NSString*)key{
+	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
 
-- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval; {
+- (void)setPlist:(id)plistObject forKey:(NSString*)key synchronous:(BOOL)sync{
+	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
+
+- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval{
+    [self setPlist:plistObject forKey:key withTimeoutInterval:timeoutInterval synchronous:NO];
+}
+
+- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
 	// Binary plists are used over XML for better performance
 	NSData* plistData = [NSPropertyListSerialization dataFromPropertyList:plistObject 
 																   format:NSPropertyListBinaryFormat_v1_0
 														 errorDescription:NULL];
 	
-	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval];
+	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
 
 #pragma mark -
 #pragma mark JSON Object methods
-- (id)jsonObjectForKey:(NSString*)key {
-NSData* jsonData = [self dataForKey:key];
-return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
+- (id)jsonObjectForKey:(NSString*)key{
+    NSData* jsonData = [self dataForKey:key];
+    return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
 }
-- (id)mutableJsonObjectForKey:(NSString*)key {
-NSData* jsonData = [self dataForKey:key];
-return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+
+- (id)mutableJsonObjectForKey:(NSString*)key{
+    NSData* jsonData = [self dataForKey:key];
+    return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
 }
-- (void)setJson:(id)jsonObject forKey:(NSString*)key {
-[self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key{
+    [self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
-- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
-[self setData:jsonData forKey:key withTimeoutInterval:timeoutInterval];
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key synchronous:(BOOL)sync{
+    [self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval{
+    [self setJson:jsonObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
+}
+
+- (void)setJson:(id)jsonObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 error:nil];
+    [self setData:jsonData forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
 
 #pragma mark -
@@ -399,12 +468,20 @@ NSData *jsonData = [NSJSONSerialization dataWithJSONObject:jsonObject options:0 
 	}
 }
 
-- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key {
-	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key{
+	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
 
-- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
-	[self setData:[NSKeyedArchiver archivedDataWithRootObject:anObject] forKey:key withTimeoutInterval:timeoutInterval];
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key synchronous:(BOOL)sync{
+	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:sync];
+}
+
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval{
+	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
+}
+
+- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
+	[self setData:[NSKeyedArchiver archivedDataWithRootObject:anObject] forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
 
 @end
