@@ -1,4 +1,4 @@
-# About EGOCache 2.0
+# About EGOCache 2.x
 EGOCache is a simple, thread-safe key value cache store.  It has native support for `NSString`, `UI/NSImage`, and `NSData`, but can store anything that implements `<NSCoding>`.  All cached items expire after the timeout, which by default, is one day.
 
 # Requirements
@@ -19,7 +19,7 @@ One other notable internal change for users upgrading from 1.0 to be aware of, i
 Feel free to contact info@enormego.com if you need any help with EGOCache.
 
 # License
-Copyright (c) 2012 enormego
+Copyright (c) 2015 enormego
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
