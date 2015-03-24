@@ -2,8 +2,8 @@
 //  EGOCache.h
 //  enormego
 //
-//  Created by Shaun Harrison on 7/4/09.
-//  Copyright (c) 2009-2012 enormego
+//  Created by Shaun Harrison.
+//  Copyright (c) 2009-2015 enormego.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -30,52 +30,59 @@
 #import <UIKit/UIKit.h>
 #endif
 
-@interface EGOCache : NSObject
-
-+ (instancetype)currentCache __deprecated; // Renamed to globalCache
-
-// Global cache for easy use
-+ (instancetype)globalCache;
-
-// Opitionally create a different EGOCache instance with it's own cache directory
-- (id)initWithCacheDirectory:(NSString*)cacheDirectory;
-
-- (void)clearCache;
-- (void)removeCacheForKey:(NSString*)key;
-
-- (BOOL)hasCacheForKey:(NSString*)key;
-
-- (NSData*)dataForKey:(NSString*)key;
-- (void)setData:(NSData*)data forKey:(NSString*)key;
-- (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
-
-- (NSString*)stringForKey:(NSString*)key;
-- (void)setString:(NSString*)aString forKey:(NSString*)key;
-- (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
-
-- (NSDate*)dateForKey:(NSString*)key;
-- (NSArray*)allKeys;
-
-#if TARGET_OS_IPHONE
-- (UIImage*)imageForKey:(NSString*)key;
-- (void)setImage:(UIImage*)anImage forKey:(NSString*)key;
-- (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
-#else
-- (NSImage*)imageForKey:(NSString*)key;
-- (void)setImage:(NSImage*)anImage forKey:(NSString*)key;
-- (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+#if !__has_feature(nullability)
+#	define nullable
+#	define nonnull
+#	define __nullable
+#	define __nonnull
 #endif
 
-- (NSData*)plistForKey:(NSString*)key;
-- (void)setPlist:(id)plistObject forKey:(NSString*)key;
-- (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+@interface EGOCache : NSObject
 
-- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key;
-- (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;	
++ (nonnull instancetype)currentCache __deprecated_msg("Renamed to globalCache");
 
-- (id<NSCoding>)objectForKey:(NSString*)key;
-- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key;
-- (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+// Global cache for easy use
++ (nonnull instancetype)globalCache;
 
-@property(nonatomic,assign) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
+// Opitionally create a different EGOCache instance with it's own cache directory
+- (nonnull instancetype)initWithCacheDirectory:(NSString __nonnull*)cacheDirectory;
+
+- (void)clearCache;
+- (void)removeCacheForKey:(NSString __nonnull*)key;
+
+- (BOOL)hasCacheForKey:(NSString __nonnull*)key;
+
+- (NSData* __nullable)dataForKey:(NSString __nonnull*)key;
+- (void)setData:(NSData __nonnull*)data forKey:(NSString __nonnull*)key;
+- (void)setData:(NSData __nonnull*)data forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
+- (NSString* __nullable)stringForKey:(NSString __nonnull*)key;
+- (void)setString:(NSString __nonnull*)aString forKey:(NSString __nonnull*)key;
+- (void)setString:(NSString __nonnull*)aString forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
+- (NSDate* __nullable)dateForKey:(NSString __nonnull*)key;
+- (NSArray __nonnull*)allKeys;
+
+#if TARGET_OS_IPHONE
+- (UIImage* __nullable)imageForKey:(NSString __nonnull*)key;
+- (void)setImage:(UIImage __nonnull*)anImage forKey:(NSString __nonnull*)key;
+- (void)setImage:(UIImage __nonnull*)anImage forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+#else
+- (NSImage* __nullable)imageForKey:(NSString __nonnull*)key;
+- (void)setImage:(NSImage __nonnull*)anImage forKey:(NSString __nonnull*)key;
+- (void)setImage:(NSImage __nonnull*)anImage forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+#endif
+
+- (NSData* __nullable)plistForKey:(NSString __nonnull*)key;
+- (void)setPlist:(nonnull id)plistObject forKey:(NSString __nonnull*)key;
+- (void)setPlist:(nonnull id)plistObject forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
+- (void)copyFilePath:(NSString __nonnull*)filePath asKey:(NSString __nonnull*)key;
+- (void)copyFilePath:(NSString __nonnull*)filePath asKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
+- (nullable id<NSCoding>)objectForKey:(NSString __nonnull*)key;
+- (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString __nonnull*)key;
+- (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString __nonnull*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
+
+@property(nonatomic) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
 @end
