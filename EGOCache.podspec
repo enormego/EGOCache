@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "EGOCache"
-  s.version      = "2.1.2"
+  s.version      = "2.1.3"
   s.summary      = "Fast Caching for Objective-C (iPhone & Mac Compatible)."
   s.description  = "EGOCache is a simple, thread-safe key value cache store. It has native support for NSString, UI/NSImage, and NSData, but can store anything that implements <NSCoding>. All cached items expire after the timeout, which by default, is one day."
   s.homepage     = "https://github.com/enormego/EGOCache"
