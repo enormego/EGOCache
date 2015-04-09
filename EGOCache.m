@@ -400,11 +400,11 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (NSData*)plistForKey:(NSString*)key; {  
 	NSData* plistData = [self dataForKey:key];
-	
-	return [NSPropertyListSerialization propertyListFromData:plistData
-											mutabilityOption:NSPropertyListImmutable
-													  format:nil
-											errorDescription:nil];
+    
+    return [NSPropertyListSerialization propertyListWithData:plistData
+                                                     options:NSPropertyListImmutable
+                                                      format:nil
+                                                       error:nil];
 }
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key{
@@ -421,9 +421,10 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
 	// Binary plists are used over XML for better performance
-	NSData* plistData = [NSPropertyListSerialization dataFromPropertyList:plistObject 
-																   format:NSPropertyListBinaryFormat_v1_0
-														 errorDescription:NULL];
+    NSData* plistData = [NSPropertyListSerialization dataWithPropertyList:plistObject
+                                                                   format:NSPropertyListBinaryFormat_v1_0
+                                                                  options:0
+                                                                    error:nil];
 	
 	[self setData:plistData forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
