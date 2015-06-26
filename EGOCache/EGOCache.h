@@ -37,6 +37,8 @@ FOUNDATION_EXPORT const unsigned char EGOCacheVersionString[];
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
+#else
+#import <Cocoa/Cocoa.h>
 #endif
 
 #if !__has_feature(nullability)

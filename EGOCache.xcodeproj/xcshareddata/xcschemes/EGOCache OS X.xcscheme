@@ -14,23 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6D95A68D1B3D0C4300B9CE4A"
+               BlueprintIdentifier = "6D95A6D61B3D0FE300B9CE4A"
                BuildableName = "EGOCache.framework"
-               BlueprintName = "EGOCache"
-               ReferencedContainer = "container:EGOCache.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6D95A6981B3D0C4300B9CE4A"
-               BuildableName = "EGOCacheTests.xctest"
-               BlueprintName = "EGOCacheTests"
+               BlueprintName = "EGOCache OS X"
                ReferencedContainer = "container:EGOCache.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -42,26 +28,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       buildConfiguration = "Debug">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6D95A6981B3D0C4300B9CE4A"
-               BuildableName = "EGOCacheTests.xctest"
-               BlueprintName = "EGOCacheTests"
-               ReferencedContainer = "container:EGOCache.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6D95A68D1B3D0C4300B9CE4A"
-            BuildableName = "EGOCache.framework"
-            BlueprintName = "EGOCache"
-            ReferencedContainer = "container:EGOCache.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -75,9 +42,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6D95A68D1B3D0C4300B9CE4A"
+            BlueprintIdentifier = "6D95A6D61B3D0FE300B9CE4A"
             BuildableName = "EGOCache.framework"
-            BlueprintName = "EGOCache"
+            BlueprintName = "EGOCache OS X"
             ReferencedContainer = "container:EGOCache.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -93,9 +60,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6D95A68D1B3D0C4300B9CE4A"
+            BlueprintIdentifier = "6D95A6D61B3D0FE300B9CE4A"
             BuildableName = "EGOCache.framework"
-            BlueprintName = "EGOCache"
+            BlueprintName = "EGOCache OS X"
             ReferencedContainer = "container:EGOCache.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

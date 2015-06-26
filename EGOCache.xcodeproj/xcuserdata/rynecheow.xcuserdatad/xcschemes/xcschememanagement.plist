@@ -4,7 +4,12 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>EGOCache.xcscheme</key>
+		<key>EGOCache OS X.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>EGOCache iOS.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -18,6 +23,11 @@
 			<true/>
 		</dict>
 		<key>6D95A6981B3D0C4300B9CE4A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>6D95A6D61B3D0FE300B9CE4A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
