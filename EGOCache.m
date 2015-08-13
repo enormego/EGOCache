@@ -85,18 +85,18 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 - (id)initWithCacheDirectory:(NSString*)cacheDirectory {
 	if((self = [super init])) {
 
-		_cacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info", DISPATCH_QUEUE_SERIAL);
-		dispatch_queue_t priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
-		dispatch_set_target_queue(priority, _cacheInfoQueue);
-		
-		_frozenCacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info.frozen", DISPATCH_QUEUE_SERIAL);
-		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
-		dispatch_set_target_queue(priority, _frozenCacheInfoQueue);
-		
-		_diskQueue = dispatch_queue_create("com.enormego.egocache.disk", DISPATCH_QUEUE_CONCURRENT);
-		priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-		dispatch_set_target_queue(priority, _diskQueue);
-		
+        _cacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info", DISPATCH_QUEUE_SERIAL);
+        dispatch_queue_t priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+        dispatch_set_target_queue(_cacheInfoQueue, priority);
+        
+        _frozenCacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info.frozen", DISPATCH_QUEUE_SERIAL);
+        priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+        dispatch_set_target_queue(_frozenCacheInfoQueue, priority);
+        
+        _diskQueue = dispatch_queue_create("com.enormego.egocache.disk", DISPATCH_QUEUE_CONCURRENT);
+        priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+        dispatch_set_target_queue(_diskQueue, priority );
+	
 		
 		_directory = cacheDirectory;
 
