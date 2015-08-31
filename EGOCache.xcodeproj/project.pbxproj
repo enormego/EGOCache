@@ -138,7 +138,7 @@
 		6D95A6851B3D0C4300B9CE4A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0630;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = enormego;
 				TargetAttributes = {
 					6D95A68D1B3D0C4300B9CE4A = {
@@ -223,6 +223,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -301,6 +302,7 @@
 				INFOPLIST_FILE = EGOCache/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enormego.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = EGOCache;
 				SKIP_INSTALL = YES;
 			};
@@ -316,6 +318,7 @@
 				INFOPLIST_FILE = EGOCache/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enormego.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = EGOCache;
 				SKIP_INSTALL = YES;
 			};
@@ -324,6 +327,7 @@
 		6D95A6DE1B3D0FE300B9CE4A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -331,6 +335,7 @@
 				INFOPLIST_FILE = EGOCache/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enormego.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = EGOCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -340,6 +345,7 @@
 		6D95A6DF1B3D0FE300B9CE4A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -347,6 +353,7 @@
 				INFOPLIST_FILE = EGOCache/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.enormego.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = EGOCache;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
