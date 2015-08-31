@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>B315F970-88A3-4E66-9ACF-714994943DA1</string>
+	<key>IDESourceControlProjectName</key>
+	<string>EGOCache</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>57AC3B140B6CEF912947B17168D6D74BBC17D007</key>
+		<string>https://github.com/rynecheow/EGOCache</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>EGOCache.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>57AC3B140B6CEF912947B17168D6D74BBC17D007</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/rynecheow/EGOCache</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>57AC3B140B6CEF912947B17168D6D74BBC17D007</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>57AC3B140B6CEF912947B17168D6D74BBC17D007</string>
+			<key>IDESourceControlWCCName</key>
+			<string>EGOCache</string>
+		</dict>
+	</array>
+</dict>
+</plist>

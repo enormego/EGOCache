@@ -7,6 +7,14 @@ EGOCache is a simple, thread-safe key value cache store.  It has native support 
 * Blocks
 * iOS or OS X
 
+### Installation with Carthage (iOS 8+)
+[Carthage](https://github.com/Carthage/Carthage) is a lightweight dependency manager for Swift and Objective-C. It leverages CocoaTouch modules and ins less invasive than CocoaPods.
+To install with Carthage, follow the instruction on [Carthage](https://github.com/Carthage/Carthage)
+#### Cartfile
+```
+github "enormego/EGOCache"
+```
+
 # Changes in 2.0
 
 The public interface in 2.0 is largely the same, with the exception of `[EGOCache currentCache]` being deprecated in favor of `[EGOCache globalCache]`.  You can now create your own instances of EGOCache and tell it to store wherever, this can be good for dividing up caches in different sections of your app.
@@ -38,4 +46,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
