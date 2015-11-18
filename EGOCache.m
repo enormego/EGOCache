@@ -82,8 +82,9 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (instancetype)init {
-	NSString*cachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
-	self = [self initWithCacheDirectory:cachesDirectory];
+	NSString* cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+	NSString* egoCacheDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
+	self = [self initWithCacheDirectory:egoCacheDirectory];
 	if (self) {
 		[self removeOldCachesDirectory];
 	}
