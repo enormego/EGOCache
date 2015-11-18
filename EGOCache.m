@@ -70,16 +70,25 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	return instance;
 }
 
+- (void)removeOldCachesDirectory {
+    dispatch_async(_diskQueue, ^{
+        NSString* cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
+        NSString* oldCachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
+        
+        if([[NSFileManager defaultManager] fileExistsAtPath:oldCachesDirectory]) {
+            [[NSFileManager defaultManager] removeItemAtPath:oldCachesDirectory error:NULL];
+        }
+    });
+}
+
 - (instancetype)init {
 	NSString* cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
-	NSString* oldCachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
-
-	if([[NSFileManager defaultManager] fileExistsAtPath:oldCachesDirectory]) {
-		[[NSFileManager defaultManager] removeItemAtPath:oldCachesDirectory error:NULL];
+	NSString* egoCacheDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
+	self = [self initWithCacheDirectory:egoCacheDirectory];
+	if (self) {
+		[self removeOldCachesDirectory];
 	}
-	
-	cachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSBundle mainBundle] bundleIdentifier]] stringByAppendingPathComponent:@"EGOCache"] copy];
-	return [self initWithCacheDirectory:cachesDirectory];
+	return self;
 }
 
 - (instancetype)initWithCacheDirectory:(NSString*)cacheDirectory {
@@ -104,20 +113,25 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		if(!_cacheInfo) {
 			_cacheInfo = [[NSMutableDictionary alloc] init];
 		}
-		
-		[[NSFileManager defaultManager] createDirectoryAtPath:_directory withIntermediateDirectories:YES attributes:nil error:NULL];
+        
+		dispatch_async(_diskQueue, ^{
+			[[NSFileManager defaultManager] createDirectoryAtPath:_directory withIntermediateDirectories:YES attributes:nil error:NULL];
+		});
 		
 		NSTimeInterval now = [[NSDate date] timeIntervalSinceReferenceDate];
 		NSMutableArray* removedKeys = [[NSMutableArray alloc] init];
 		
 		for(NSString* key in _cacheInfo) {
 			if([_cacheInfo[key] timeIntervalSinceReferenceDate] <= now) {
-				[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+				dispatch_async(_diskQueue, ^{
+					[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+				});
 				[removedKeys addObject:key];
 			}
 		}
 		
 		[_cacheInfo removeObjectsForKeys:removedKeys];
+        
 		self.frozenCacheInfo = _cacheInfo;
 		[self setDefaultTimeoutInterval:86400];
 	}
