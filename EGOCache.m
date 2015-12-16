@@ -106,7 +106,14 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		}
 		
 		[[NSFileManager defaultManager] createDirectoryAtPath:_directory withIntermediateDirectories:YES attributes:nil error:NULL];
-		
+		NSURL *url = [NSURL fileURLWithPath:_directory];
+        	NSError *error = nil;
+        	BOOL success = [url setResourceValue:[NSNumber numberWithBool: YES]
+                                      forKey: NSURLIsExcludedFromBackupKey error: &error];
+        	if(!success){
+        		NSLog(@"Error excluding %@ from backup %@", [url lastPathComponent], error);
+        	}
+        	
 		NSTimeInterval now = [[NSDate date] timeIntervalSinceReferenceDate];
 		NSMutableArray* removedKeys = [[NSMutableArray alloc] init];
 		
