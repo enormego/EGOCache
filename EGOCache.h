@@ -84,5 +84,5 @@
 - (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString* __nonnull)key;
 - (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 
-@property(nonatomic) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
+@property(nonatomic) NSTimeInterval defaultCacheTimeoutInterval; // Default is 1 day
 @end

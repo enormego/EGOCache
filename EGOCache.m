@@ -119,7 +119,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		
 		[_cacheInfo removeObjectsForKeys:removedKeys];
 		self.frozenCacheInfo = _cacheInfo;
-		[self setDefaultTimeoutInterval:86400];
+		[self setDefaultCacheTimeoutInterval:86400];
 	}
 	
 	return self;
@@ -215,7 +215,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark Copy file methods
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key {
-	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self copyFilePath:filePath asKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -230,7 +230,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #pragma mark Data methods
 
 - (void)setData:(NSData*)data forKey:(NSString*)key {
-	[self setData:data forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setData:data forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setData:(NSData*)data forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -276,7 +276,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
-	[self setString:aString forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setString:aString forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -301,7 +301,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -321,7 +321,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
-	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setImage:anImage forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
@@ -339,7 +339,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key; {
-	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setPlist:(id)plistObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval; {
@@ -363,7 +363,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key {
-	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval];
+	[self setObject:anObject forKey:key withTimeoutInterval:self.defaultCacheTimeoutInterval];
 }
 
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
