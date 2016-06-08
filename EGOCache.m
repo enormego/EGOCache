@@ -310,11 +310,26 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	}
 }
 
+- (NSData*)dataForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    NSData* tmpObject = [self dataForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
+}
+
 #pragma mark -
 #pragma mark String methods
 
 - (NSString*)stringForKey:(NSString*)key {
 	return [[NSString alloc] initWithData:[self dataForKey:key] encoding:NSUTF8StringEncoding];
+}
+
+- (NSString*)stringForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    return [[NSString alloc] initWithData:[self dataForKey:key RestartTimeOutInterval:newTimeOut] encoding:NSUTF8StringEncoding];
 }
 
 - (void)setString:(NSString*)aString forKey:(NSString*)key {
@@ -334,7 +349,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 #pragma mark -
-#pragma mark Image methds
+#pragma mark Image methods
 
 #if TARGET_OS_IPHONE
 
@@ -344,10 +359,21 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	@try {
 		image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
 	} @catch (NSException* e) {
-		// Surpress any unarchiving exceptions and continue with nil
+		// Supress any unarchiving exceptions and continue with nil
 	}
 	
 	return image;
+}
+
+- (UIImage*)imageForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    UIImage* tmpObject = [self imageForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key{
@@ -376,6 +402,17 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (NSImage*)imageForKey:(NSString*)key {
 	return [[NSImage alloc] initWithData:[self dataForKey:key]];
+}
+
+- (NSImage*)imageForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    NSImage* tmpObject = [self imageForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
 }
 
 - (void)setImage:(NSImage*)anImage forKey:(NSString*)key {
@@ -407,6 +444,17 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
                                                        error:nil];
 }
 
+- (NSData*)plistForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    NSData* tmpObject = [self plistForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
+}
+
 - (void)setPlist:(id)plistObject forKey:(NSString*)key{
 	[self setPlist:plistObject forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
@@ -431,14 +479,37 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 #pragma mark -
 #pragma mark JSON Object methods
+
 - (id)jsonObjectForKey:(NSString*)key{
     NSData* jsonData = [self dataForKey:key];
     return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingAllowFragments error:nil];
 }
 
+- (id)jsonObjectForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    id tmpObject = [self jsonObjectForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
+}
+
 - (id)mutableJsonObjectForKey:(NSString*)key{
     NSData* jsonData = [self dataForKey:key];
     return [NSJSONSerialization JSONObjectWithData:jsonData options:NSJSONReadingMutableContainers error:nil];
+}
+
+- (id)mutableJsonObjectForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    id tmpObject = [self mutableJsonObjectForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
 }
 
 - (void)setJson:(id)jsonObject forKey:(NSString*)key{
@@ -467,6 +538,17 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	} else {
 		return nil;
 	}
+}
+
+- (id<NSCoding>)objectForKey:(NSString*)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut{
+    id tmpObject = [self objectForKey:key];
+    
+    if (tmpObject){
+        //If object exists we reset the timeout to the established value
+        [self setCacheTimeoutInterval:newTimeOut forKey:key];
+    }
+    
+    return tmpObject;
 }
 
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key{

@@ -55,12 +55,14 @@
 - (NSString* __nullable)pathForKey:(NSString* __nonnull)key;
 
 - (NSData* __nullable)dataForKey:(NSString* __nonnull)key;
+- (NSData* __nullable)dataForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setData:(NSData* __nonnull)data forKey:(NSString* __nonnull)key;
 - (void)setData:(NSData* __nonnull)data forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setData:(NSData* __nonnull)data forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 - (void)setData:(NSData* __nonnull)data forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (NSString* __nullable)stringForKey:(NSString* __nonnull)key;
+- (NSString* __nullable)stringForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setString:(NSString* __nonnull)aString forKey:(NSString* __nonnull)key;
 - (void)setString:(NSString* __nonnull)aString forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setString:(NSString* __nonnull)aString forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
@@ -71,12 +73,14 @@
 
 #if TARGET_OS_IPHONE
 - (UIImage* __nullable)imageForKey:(NSString* __nonnull)key;
+- (UIImage* __nullable)imageForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setImage:(UIImage* __nonnull)anImage forKey:(NSString* __nonnull)key;
 - (void)setImage:(UIImage* __nonnull)anImage forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setImage:(UIImage* __nonnull)anImage forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 - (void)setImage:(UIImage* __nonnull)anImage forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 #else
 - (NSImage* __nullable)imageForKey:(NSString* __nonnull)key;
+- (NSImage* __nullable)imageForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setImage:(NSImage* __nonnull)anImage forKey:(NSString* __nonnull)key;
 - (void)setImage:(UIImage* __nonnull)anImage forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setImage:(NSImage* __nonnull)anImage forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
@@ -84,13 +88,16 @@
 #endif
 
 - (NSData* __nullable)plistForKey:(NSString* __nonnull)key;
+- (NSData* __nullable)plistForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setPlist:(nonnull id)plistObject forKey:(NSString* __nonnull)key;
 - (void)setPlist:(nonnull id)plistObject forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setPlist:(nonnull id)plistObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 - (void)setPlist:(nonnull id)plistObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
 - (id __nullable)jsonObjectForKey:(NSString* __nonnull)key;
+- (id __nullable)jsonObjectForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (id __nullable)mutableJsonObjectForKey:(NSString* __nonnull)key;
+- (id __nullable)mutableJsonObjectForKey:(NSString* __nonnull)key RestartTimeOutInterval:(NSTimeInterval)newTimeOut;
 - (void)setJson:(nonnull id)jsonObject forKey:(NSString* __nonnull)key;
 - (void)setJson:(nonnull id)jsonObject forKey:(NSString* __nonnull)key synchronous:(BOOL)sync;
 - (void)setJson:(nonnull id)jsonObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
