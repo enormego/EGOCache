@@ -289,15 +289,27 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 #if TARGET_OS_IPHONE
 
 - (UIImage*)imageForKey:(NSString*)key {
-	UIImage* image = nil;
-	
-	@try {
-		image = [NSKeyedUnarchiver unarchiveObjectWithFile:cachePathForKey(_directory, key)];
-	} @catch (NSException* e) {
-		// Surpress any unarchiving exceptions and continue with nil
-	}
-	
-	return image;
+    UIImage* image = nil;
+    NSString *pathImage = nil;
+    @try {
+        pathImage = cachePathForKey(_directory, key);
+        image = [NSKeyedUnarchiver unarchiveObjectWithFile:pathImage];
+        if (!image) {
+            image = [UIImage imageNamed:pathImage];
+        }
+    } @catch (NSException* e) {
+        
+        if (!image && pathImage){
+            @try {
+                NSData *data = [NSData dataWithContentsOfFile:pathImage];
+                image = [UIImage imageWithData:data];
+            } @catch (NSException *e1) {
+                
+            }
+        }
+    }
+    
+    return image;
 }
 
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key {
