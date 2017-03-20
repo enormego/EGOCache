@@ -2,8 +2,8 @@
 //  EGOCache.h
 //  enormego
 //
-//  Created by Shaun Harrison on 7/4/09.
-//  Copyright (c) 2009-2012 enormego
+//  Created by Shaun Harrison.
+//  Copyright (c) 2009-2015 enormego.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -31,21 +31,23 @@
 #endif
 
 #if !__has_feature(nullability)
+
 # define nullable
 # define nonnull
 # define __nullable
 # define __nonnull
+
 #endif
 
 @interface EGOCache : NSObject
 
-+ (nonnull instancetype)currentCache __deprecated; // Renamed to globalCache
++ (nonnull instancetype)currentCache __deprecated_msg("Renamed to globalCache");
 
 // Global cache for easy use
 + (nonnull instancetype)globalCache;
 
 // Opitionally create a different EGOCache instance with it's own cache directory
-- (nonnull id)initWithCacheDirectory:(NSString* __nonnull)cacheDirectory;
+- (nonnull instancetype)initWithCacheDirectory:(NSString* __nonnull)cacheDirectory;
 
 - (void)clearCache;
 - (void)removeCacheForKey:(NSString* __nonnull)key;
@@ -115,5 +117,5 @@
 - (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval;
 - (void)setObject:(nonnull id<NSCoding>)anObject forKey:(NSString* __nonnull)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync;
 
-@property(nonatomic,assign) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
+@property(nonatomic) NSTimeInterval defaultTimeoutInterval; // Default is 1 day
 @end

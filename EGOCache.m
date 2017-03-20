@@ -2,8 +2,8 @@
 //  EGOCache.m
 //  enormego
 //
-//  Created by Shaun Harrison on 7/4/09.
-//  Copyright (c) 2009-2012 enormego
+//  Created by Shaun Harrison.
+//  Copyright (c) 2009-2015 enormego.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@
 #import "EGOCache.h"
 
 #if DEBUG
-#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) { \
-NSLog(@"EGOCache.plist is a reserved key and can not be modified."); \
-return; }
+#	define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) { \
+		NSLog(@"EGOCache.plist is a reserved key and can not be modified."); \
+		return; }
 #else
-#define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
+#	define CHECK_FOR_EGOCACHE_PLIST() if([key isEqualToString:@"EGOCache.plist"]) return;
 #endif
 
 static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
@@ -70,7 +70,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	return instance;
 }
 
-- (id)init {
+- (instancetype)init {
 	NSString* cachesDirectory = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES)[0];
 	NSString* oldCachesDirectory = [[[cachesDirectory stringByAppendingPathComponent:[[NSProcessInfo processInfo] processName]] stringByAppendingPathComponent:@"EGOCache"] copy];
 
@@ -82,7 +82,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	return [self initWithCacheDirectory:cachesDirectory];
 }
 
-- (id)initWithCacheDirectory:(NSString*)cacheDirectory {
+- (instancetype)initWithCacheDirectory:(NSString*)cacheDirectory {
 	if((self = [super init])) {
 
         _cacheInfoQueue = dispatch_queue_create("com.enormego.egocache.info", DISPATCH_QUEUE_SERIAL);
@@ -96,7 +96,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
         _diskQueue = dispatch_queue_create("com.enormego.egocache.disk", DISPATCH_QUEUE_CONCURRENT);
         priority = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
         dispatch_set_target_queue(_diskQueue, priority );
-	
 		
 		_directory = cacheDirectory;
 
@@ -107,7 +106,14 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		}
 		
 		[[NSFileManager defaultManager] createDirectoryAtPath:_directory withIntermediateDirectories:YES attributes:nil error:NULL];
-		
+		NSURL *url = [NSURL fileURLWithPath:_directory];
+        	NSError *error = nil;
+        	BOOL success = [url setResourceValue:[NSNumber numberWithBool: YES]
+                                      forKey: NSURLIsExcludedFromBackupKey error: &error];
+        	if(!success){
+        		NSLog(@"Error excluding %@ from backup %@", [url lastPathComponent], error);
+        	}
+        	
 		NSTimeInterval now = [[NSDate date] timeIntervalSinceReferenceDate];
 		NSMutableArray* removedKeys = [[NSMutableArray alloc] init];
 		
@@ -153,9 +159,9 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 }
 
 - (BOOL)hasCacheForKey:(NSString*)key {
-    NSDate* date = [self dateForKey:key];
-	if(!date) return NO;
-	if([date compare:[NSDate date]] != NSOrderedDescending) return NO;
+	NSDate* date = [self dateForKey:key];
+	if(date == nil) return NO;
+	if([date timeIntervalSinceReferenceDate] < CFAbsoluteTimeGetCurrent()) return NO;
 	
 	return [[NSFileManager defaultManager] fileExistsAtPath:cachePathForKey(_directory, key)];
 }
@@ -167,17 +173,17 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		date = (self.frozenCacheInfo)[key];
 	});
 
-    return date;
+	return date;
 }
 
 - (NSArray*)allKeys {
-    __block NSArray* keys = nil;
+	__block NSArray* keys = nil;
 
-    dispatch_sync(_frozenCacheInfoQueue, ^{
-        keys = [self.frozenCacheInfo allKeys];
-    });
+	dispatch_sync(_frozenCacheInfoQueue, ^{
+		keys = [self.frozenCacheInfo allKeys];
+	});
 
-    return keys;
+	return keys;
 }
 
 - (void)setCacheTimeoutInterval:(NSTimeInterval)timeoutInterval forKey:(NSString*)key {
@@ -195,7 +201,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		
 		self.frozenCacheInfo = info;
 	});
-	
 	
 	// Save the final copy (this may be blocked by other operations)
 	dispatch_async(_cacheInfoQueue, ^{
@@ -436,7 +441,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (NSData*)plistForKey:(NSString*)key; {  
 	NSData* plistData = [self dataForKey:key];
-    
     return [NSPropertyListSerialization propertyListWithData:plistData
                                                      options:NSPropertyListImmutable
                                                       format:nil
@@ -565,5 +569,4 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 - (void)setObject:(id<NSCoding>)anObject forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
 	[self setData:[NSKeyedArchiver archivedDataWithRootObject:anObject] forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
 }
-
 @end
