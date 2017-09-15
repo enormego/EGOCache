@@ -430,8 +430,8 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
     [self setImage:anImage forKey:key withTimeoutInterval:self.defaultTimeoutInterval synchronous:NO];
 }
 - (void)setImage:(UIImage*)anImage forKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval synchronous:(BOOL)sync{
-    [self setData:[[[anImage representations] objectAtIndex:0] representationUsingType:NSPNGFileType properties:nil]
-		   forKey:key withTimeoutInterval:timeoutInterval synchronous:sync];
+	NSBitmapImageRep *bitmapRep = (id)anImage.representations.firstObject;
+	[self setData:[bitmapRep representationUsingType:NSPNGFileType properties:@{}] forKey:key withTimeoutInterval:timeoutInterval];
 }
 
 #endif
