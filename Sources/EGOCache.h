@@ -3,7 +3,7 @@
 //  enormego
 //
 //  Created by Shaun Harrison.
-//  Copyright (c) 2009-2015 enormego.
+//  Copyright (c) 2009-2017 enormego.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,12 @@
 #import <UIKit/UIKit.h>
 #endif
 
+//! Project version number for EGOCache.
+FOUNDATION_EXPORT double EGOCacheVersionNumber;
+
+//! Project version string for EGOCache.
+FOUNDATION_EXPORT const unsigned char EGOCacheVersionString[];
+
 #if !__has_feature(nullability)
 #	define nullable
 #	define nonnull
@@ -38,8 +44,6 @@
 #endif
 
 @interface EGOCache : NSObject
-
-+ (nonnull instancetype)currentCache __deprecated_msg("Renamed to globalCache");
 
 // Global cache for easy use
 + (nonnull instancetype)globalCache;

@@ -3,7 +3,7 @@
 //  enormego
 //
 //  Created by Shaun Harrison.
-//  Copyright (c) 2009-2015 enormego.
+//  Copyright (c) 2009-2017 enormego.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -54,10 +54,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 @end
 
 @implementation EGOCache
-
-+ (instancetype)currentCache {
-	return [self globalCache];
-}
 
 + (instancetype)globalCache {
 	static id instance;
@@ -312,7 +308,6 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 		// Something went wrong, but we'll fail silently.
 	}
 }
-
 
 #else
 
