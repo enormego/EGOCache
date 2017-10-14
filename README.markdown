@@ -1,25 +1,28 @@
-# About EGOCache 2.x
-EGOCache is a simple, thread-safe key value cache store.  It has native support for `NSString`, `UI/NSImage`, and `NSData`, but can store anything that implements `<NSCoding>`.  All cached items expire after the timeout, which by default, is one day.
+# EGOCache
+EGOCache is a simple, thread-safe key value cache store for macOS, iOS, tvOS and watchOS.
 
-# Requirements
+It has native support for `NSString`, `UIImage`, `NSImage`, and `NSData`, but can store anything that implements `<NSCoding>`.  All cached items expire after the timeout, which by default, is one day.
 
-* ARC
-* Blocks
-* iOS or OS X
+## Installation
 
-# Changes in 2.0
+### Carthage
 
-The public interface in 2.0 is largely the same, with the exception of `[EGOCache currentCache]` being deprecated in favor of `[EGOCache globalCache]`.  You can now create your own instances of EGOCache and tell it to store wherever, this can be good for dividing up caches in different sections of your app.
+```
+github "enormego/EGOCache" ~> 2.2.0
+```
 
-Internally, EGOCache was largely rewritten to take advantage of libdispatch and is far more stable/performant when handling saves from multiple threads than it was in the past.
+### CocoaPods
 
-One other notable internal change for users upgrading from 1.0 to be aware of, is UIImage's are no longer stored via `UIImagePNGRepresentation`.  They're stored now by archiving UIImage itself, which allows us to retain information such as image scale, orientation, and also store the image in it's native type, so JPEG's are no longer inflated to PNG sizes.  If you were previously saving images via `setImage:forKey:`, but for some reason retrieving them via `dataForKey:`, you'll need to update your code to account for this.
+```
+pod 'EGOCache', '~> 2.2.0'
+```
 
-# Questions
-Feel free to contact info@enormego.com if you need any help with EGOCache.
+### Without a dependency manager
 
-# License
-Copyright (c) 2015 enormego
+Drag EGOCache.h and EGOCache.m into your project.
+
+## License
+Copyright (c) 2017 enormego
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
