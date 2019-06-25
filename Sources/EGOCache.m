@@ -123,14 +123,14 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (void)clearCache {
 	dispatch_sync(_cacheInfoQueue, ^{
-		for(NSString* key in _cacheInfo) {
-			[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+		for(NSString* key in self->_cacheInfo) {
+			[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(self->_directory, key) error:NULL];
 		}
 		
-		[_cacheInfo removeAllObjects];
+		[self->_cacheInfo removeAllObjects];
 		
-		dispatch_sync(_frozenCacheInfoQueue, ^{
-			self.frozenCacheInfo = [_cacheInfo copy];
+		dispatch_sync(self->_frozenCacheInfoQueue, ^{
+			self->_frozenCacheInfo = [self->_cacheInfo copy];
 		});
 
 		[self setNeedsSave];
@@ -141,7 +141,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	CHECK_FOR_EGOCACHE_PLIST();
 
 	dispatch_async(_diskQueue, ^{
-		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(_directory, key) error:NULL];
+		[[NSFileManager defaultManager] removeItemAtPath:cachePathForKey(self->_directory, key) error:NULL];
 	});
 
 	[self setCacheTimeoutInterval:0 forKey:key];
@@ -194,13 +194,13 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 	// Save the final copy (this may be blocked by other operations)
 	dispatch_async(_cacheInfoQueue, ^{
 		if(date) {
-			_cacheInfo[key] = date;
+			self->_cacheInfo[key] = date;
 		} else {
-			[_cacheInfo removeObjectForKey:key];
+			[self->_cacheInfo removeObjectForKey:key];
 		}
 		
-		dispatch_sync(_frozenCacheInfoQueue, ^{
-			self.frozenCacheInfo = [_cacheInfo copy];
+		dispatch_sync(self->_frozenCacheInfoQueue, ^{
+			self->_frozenCacheInfo = [self->_cacheInfo copy];
 		});
 
 		[self setNeedsSave];
@@ -216,7 +216,7 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (void)copyFilePath:(NSString*)filePath asKey:(NSString*)key withTimeoutInterval:(NSTimeInterval)timeoutInterval {
 	dispatch_async(_diskQueue, ^{
-		[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(_directory, key) error:NULL];
+		[[NSFileManager defaultManager] copyItemAtPath:filePath toPath:cachePathForKey(self->_directory, key) error:NULL];
 	});
 	
 	[self setCacheTimeoutInterval:timeoutInterval forKey:key];
@@ -243,15 +243,15 @@ static inline NSString* cachePathForKey(NSString* directory, NSString* key) {
 
 - (void)setNeedsSave {
 	dispatch_async(_cacheInfoQueue, ^{
-		if(_needsSave) return;
-		_needsSave = YES;
+		if(self->_needsSave) return;
+		self->_needsSave = YES;
 		
 		double delayInSeconds = 0.5;
 		dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
-		dispatch_after(popTime, _cacheInfoQueue, ^(void){
-			if(!_needsSave) return;
-			[_cacheInfo writeToFile:cachePathForKey(_directory, @"EGOCache.plist") atomically:YES];
-			_needsSave = NO;
+		dispatch_after(popTime, self->_cacheInfoQueue, ^(void){
+			if(!self->_needsSave) return;
+			[self->_cacheInfo writeToFile:cachePathForKey(self->_directory, @"EGOCache.plist") atomically:YES];
+			self->_needsSave = NO;
 		});
 	});
 }
